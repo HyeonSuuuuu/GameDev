@@ -1,3 +1,6 @@
+https://grandiose-delphinium-56f.notion.site/2649f08c004a81e49fa9f14f5815fdd5?source=copy_link
+
+
 ## 컨벤션
 
 - 스크립트
