@@ -19,3 +19,33 @@ https://grandiose-delphinium-56f.notion.site/2649f08c004a81e49fa9f14f5815fdd5?so
     - Refactor: 코드 리팩터링
     - Test: 테스트 추가/수정
     - Chore: 빌드 업무, 기타 수정 (코드 기능이나 버그 수정과는 관련 없는 유지보수 작업)
+
+
+```markdown
+# C++ Core Guidelines Code Review Checklist
+
+## Resource Management (R)
+- [ ] 모든 new는 make_unique/make_shared로 교체 가능한가?
+- [ ] 모든 raw pointers가 명확한 소유권을 가지는가?
+- [ ] 모든 자원이 RAII로 관리되는가?
+
+## Functions (F)
+- [ ] 함수 매개변수의 소유권이 명확한가?
+- [ ] 큰 객체를 const 참조로 전달하는가?
+- [ ] 함수가 수정하지 않는 인자에 const를 사용하는가?
+
+## Type System (T)
+- [ ] auto로 타입을 충분히 활용하는가?
+- [ ] 타입 변환이 명시적인가?
+- [ ] 강타입(strong types)을 정의할 기회가 있는가?
+
+## Error Handling (E)
+- [ ] 오류 조건을 예외로 표현하는가?
+- [ ] RAII와 예외가 조화롭게 작동하는가?
+- [ ] 예외 안전성 보장(basic, strong, nothrow)이 있는가?
+
+## Concurrency (CP)
+- [ ] 모든 데이터 경쟁이 제거되었는가?
+- [ ] std::thread가 RAII로 관리되는가?
+- [ ] 데드락 위험이 없는가?
+```
