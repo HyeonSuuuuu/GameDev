@@ -1,0 +1,44 @@
+## === Visual Studio / C++ Server Ignore Rules ===
+
+# 1. 컴파일 결과물 (Output)
+# 빌드 시 생성되는 실행 파일과 라이브러리
+Debug/
+Release/
+x64/
+x86/
+[Aa]rm/
+[Aa]rm64/
+*.exe
+*.dll
+*.lib
+*.exp
+*.ilk
+*.pdb
+
+# 2. Visual Studio 작업 환경 및 캐시 (IDE)
+# 프로젝트 설정 및 인텔리센스용 DB (매우 용량이 큼)
+.vs/
+ipch/
+*.VC.db
+*.VC.opendb
+*.suo
+*.user
+*.userosscache
+*.sln.doccache
+*.ncb
+*.sdf
+*.opensdf
+
+# 3. 중간 파일 (Intermediate)
+# 컴파일 과정에서 생기는 임시 객체 파일
+*.obj
+*.sbr
+*.tlog
+*.idb
+*.lastbuildstate
+*.unsuccessfulbuild
+*.recipe
+
+# 4. 기타
+*.log
+*.tmp
