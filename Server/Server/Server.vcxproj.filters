@@ -12,5 +12,6 @@
     <ClCompile Include="IOCompletionPort.cpp" />
     <ClCompile Include="Common.ixx" />
     <ClCompile Include="Types.ixx" />
+    <ClCompile Include="Log.ixx" />
   </ItemGroup>
 </Project>

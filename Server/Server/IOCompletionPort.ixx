@@ -22,18 +22,18 @@ namespace IOCompletionPort
 
 	struct OverlappedEx
 	{
-		WSAOVERLAPPED wsaOverlapped;
-		SOCKET socketClient;
-		WSABUF wsaBuf;
-		char buf[MAX_SOCKBUF];
-		IOOperation operation;
+		WSAOVERLAPPED m_wsaOverlapped;
+		SOCKET m_socketClient;
+		WSABUF m_wsaBuf;
+		char m_buf[MAX_SOCKBUF];
+		IOOperation m_operation;
 	};
 
 	struct ClientInfo
 	{
-		SOCKET socketClient;
-		OverlappedEx recvOverlappedEx;
-		OverlappedEx sendOverlappedEx;
+		SOCKET m_socketClient;
+		OverlappedEx m_recvOverlappedEx;
+		OverlappedEx m_sendOverlappedEx;
 
 		ClientInfo();
 	};
@@ -46,7 +46,7 @@ namespace IOCompletionPort
 		
 		bool InitEnvironment();
 		bool InitSocket();
-		bool BindandListen();
+		bool BindandListen(const int32 port);
 		bool StartServer(const uint32 maxClientCount);
 		void DestroyThread();
 
@@ -66,8 +66,8 @@ namespace IOCompletionPort
 		SOCKET m_listenSocket;
 		int m_clientCnt = 0;
 		
-		std::vector<std::thread> mIOWorkerThreads;
-		std::thread m_AccepterThread;
+		std::vector<std::thread> m_IOWorkerThreads;
+		std::thread m_accepterThread;
 		HANDLE m_IOCPHandle;
 		bool m_isWorkerRun;
 		bool m_isAccepterRun;
