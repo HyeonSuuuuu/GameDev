@@ -133,8 +133,9 @@
   <ItemGroup>
     <ClCompile Include="Common.ixx" />
     <ClCompile Include="Define.ixx" />
-    <ClCompile Include="IOCompletionPort.cpp" />
-    <ClCompile Include="IOCompletionPort.ixx" />
+    <ClCompile Include="EchoServer.ixx" />
+    <ClCompile Include="IOCPNetwork.cpp" />
+    <ClCompile Include="IOCPNetwork.ixx" />
     <ClCompile Include="Log.ixx" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Types.ixx" />

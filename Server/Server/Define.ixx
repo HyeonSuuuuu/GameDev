@@ -27,18 +27,16 @@ export {
 
 	struct ClientInfo
 	{
-		SOCKET m_socketClient;
-		OverlappedEx m_recvOverlappedEx;
-		OverlappedEx m_sendOverlappedEx;
-		char m_sendBuf[MAX_SOCKBUF];
-		char m_recvBuf[MAX_SOCKBUF];
-		ClientInfo()
-			: m_socketClient(INVALID_SOCKET)
-			, m_sendBuf {}
-			, m_recvBuf {}
-		{
-			ZeroMemory(&m_recvOverlappedEx, sizeof(OverlappedEx));
-			ZeroMemory(&m_sendOverlappedEx, sizeof(OverlappedEx));
-		}
+		uint32 m_index = 0;
+		SOCKET m_socketClient = INVALID_SOCKET;
+		OverlappedEx m_recvOverlappedEx {};
+		OverlappedEx m_sendOverlappedEx {};
+		char m_sendBuf[MAX_SOCKBUF] {};
+		char m_recvBuf[MAX_SOCKBUF] {};
+
+		ClientInfo() = delete;
+		ClientInfo(uint32 index)
+			: m_index(index)
+		{ }
 	};
 }

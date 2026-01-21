@@ -1,6 +1,6 @@
 #include <print>
 
-import IOCompletionPort;
+import EchoServer;
 import Common;
 
 constexpr uint16 SERVER_PORT = 11021;
@@ -9,15 +9,25 @@ constexpr uint16 MAX_CLIENT = 100;
 
 int main()
 {
-	IOCompletionPort::IOCompletionPort iocp;
+	EchoServer server;
 
-	iocp.InitEnvironment();
-	iocp.InitSocket();
-	iocp.BindandListen(SERVER_PORT);
-	iocp.StartServer(MAX_CLIENT);
+	server.InitEnvironment();
+	server.InitSocket();
+	server.BindandListen(SERVER_PORT);
+	server.StartServer(MAX_CLIENT);
 	std::print("아무 키나 누를 때까지 대기합니다\n");
-	getchar();
 
-	iocp.DestroyThread();
+	while (true)
+	{
+		std::string inputCmd;
+		std::getline(std::cin, inputCmd);
+
+		if (inputCmd == "quit")
+		{
+			break;
+		}
+	}
+
+	server.DestroyThread();
 	return 0;
 }
