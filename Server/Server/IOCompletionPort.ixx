@@ -8,36 +8,10 @@ module;
 export module IOCompletionPort;
 
 import Common;
+import Define;
 
 namespace IOCompletionPort
 {
-	constexpr int16 MAX_SOCKBUF = 1024;
-	constexpr int8 MAX_WORKERTHREAD = 4;
-
-	enum class IOOperation : uint8
-	{
-		RECV,
-		SEND,
-	};
-
-	struct OverlappedEx
-	{
-		WSAOVERLAPPED m_wsaOverlapped;
-		SOCKET m_socketClient;
-		WSABUF m_wsaBuf;
-		char m_buf[MAX_SOCKBUF];
-		IOOperation m_operation;
-	};
-
-	struct ClientInfo
-	{
-		SOCKET m_socketClient;
-		OverlappedEx m_recvOverlappedEx;
-		OverlappedEx m_sendOverlappedEx;
-
-		ClientInfo();
-	};
-
 	export class IOCompletionPort
 	{
 	public:

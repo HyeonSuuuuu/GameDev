@@ -5,15 +5,11 @@ module;
 module IOCompletionPort;
 
 import Common;
+import Define;
 
 namespace IOCompletionPort
 {
-	ClientInfo::ClientInfo()
-		: m_socketClient(INVALID_SOCKET)
-	{
-		ZeroMemory(&m_recvOverlappedEx, sizeof(OverlappedEx));
-		ZeroMemory(&m_sendOverlappedEx, sizeof(OverlappedEx));
-	}
+
 
 
 	IOCompletionPort::IOCompletionPort()
@@ -195,15 +191,15 @@ namespace IOCompletionPort
 
 			if (IOOperation::RECV == pOverlappedEx->m_operation)
 			{
-				pOverlappedEx->m_buf[dwIoSize] = '\0';
-				std::print("[수신] bytes : {:d} , msg : {:s}\n", dwIoSize, pOverlappedEx->m_buf);
+				pClientInfo->m_recvBuf[dwIoSize] = '\0';
+				std::print("[수신] bytes : {:d} , msg : {:s}\n", dwIoSize, pClientInfo->m_recvBuf);
 				
-				SendMsg(pClientInfo, pOverlappedEx->m_buf, dwIoSize);
+				SendMsg(pClientInfo, pClientInfo->m_recvBuf, dwIoSize);
 				BindRecv(pClientInfo);
 			}
 			else if (IOOperation::SEND == pOverlappedEx->m_operation)
 			{
-				std::string_view msg(pOverlappedEx->m_buf, dwIoSize);
+				std::string_view msg(pClientInfo->m_sendBuf, dwIoSize);
 				std::print("[송신] bytes : {:d} , msg : {:s}\n ", dwIoSize, msg);
 			}
 			else
@@ -293,7 +289,7 @@ namespace IOCompletionPort
 		DWORD dwRecvNumBytes = 0;
 
 		pClientInfo->m_recvOverlappedEx.m_wsaBuf.len = MAX_SOCKBUF;
-		pClientInfo->m_recvOverlappedEx.m_wsaBuf.buf = pClientInfo->m_recvOverlappedEx.m_buf;
+		pClientInfo->m_recvOverlappedEx.m_wsaBuf.buf = pClientInfo->m_recvBuf;
 		pClientInfo->m_recvOverlappedEx.m_operation = IOOperation::RECV;
 
 		int ret = WSARecv(pClientInfo->m_socketClient,
@@ -316,10 +312,10 @@ namespace IOCompletionPort
 	{
 		DWORD dwRecvNumBytes = 0;
 		
-		CopyMemory(pClientInfo->m_sendOverlappedEx.m_buf, pMsg, len);
+		CopyMemory(pClientInfo->m_sendBuf, pMsg, len);
 
 		pClientInfo->m_sendOverlappedEx.m_wsaBuf.len = len;
-		pClientInfo->m_sendOverlappedEx.m_wsaBuf.buf = pClientInfo->m_sendOverlappedEx.m_buf;
+		pClientInfo->m_sendOverlappedEx.m_wsaBuf.buf = pClientInfo->m_sendBuf;
 		pClientInfo->m_sendOverlappedEx.m_operation = IOOperation::SEND;
 
 		int ret = WSASend(pClientInfo->m_socketClient,

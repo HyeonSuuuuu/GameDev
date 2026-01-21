@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Common.ixx" />
+    <ClCompile Include="Define.ixx" />
     <ClCompile Include="IOCompletionPort.cpp" />
     <ClCompile Include="IOCompletionPort.ixx" />
     <ClCompile Include="Log.ixx" />
