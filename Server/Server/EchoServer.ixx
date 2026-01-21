@@ -14,11 +14,11 @@ export class EchoServer : public IOCPNetwork
 		
 	virtual void OnClose(const uint32 clientIndex) override
 	{
-		std::print("[OnClose]: Index({}\n", clientIndex);
+		std::print("[OnClose]: Index({})\n", clientIndex);
 	}
 
-	virtual void OnRecv(const uint32 clientIndex, const uint32 size, char* pData) override
+	virtual void OnRecv(const uint32 clientIndex, const std::span<char> recvData) override
 	{
-		std::print("[OnRecv]: Index({}), dataSize({})\n", clientIndex, size);
+		std::print("[OnRecv]: Index({}), dataSize({})\n", clientIndex, recvData.size());
 	}
 };

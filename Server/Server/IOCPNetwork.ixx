@@ -25,7 +25,7 @@ public:
 
 	virtual void OnConnect(const uint32 clientIndex) = 0;
 	virtual void OnClose(const uint32 clientIndex) = 0;
-	virtual void OnRecv(const uint32 clientIndex, const uint32 size, char* pData) = 0;
+	virtual void OnRecv(const uint32 clientIndex, const std::span<char> data) = 0;
 
 
 private:

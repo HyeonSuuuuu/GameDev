@@ -180,7 +180,8 @@ void IOCPNetwork::WorkerThread()
 
 		if (IOOperation::RECV == pOverlappedEx->m_operation)
 		{
-			OnRecv(pClientInfo->m_index, dwIoSize, pClientInfo->m_recvBuf);
+			const std::span<char> recvData{ pClientInfo->m_recvBuf, dwIoSize };
+			OnRecv(pClientInfo->m_index, recvData);
 				
 			SendMsg(pClientInfo, pClientInfo->m_recvBuf, dwIoSize);
 			BindRecv(pClientInfo);
