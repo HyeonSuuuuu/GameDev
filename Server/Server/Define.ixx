@@ -3,9 +3,7 @@ module;
 #include <ws2tcpip.h>
 
 export module Define;
-
 import Common;
-
 
 export {
 	constexpr int16 MAX_SOCKBUF = 1024;

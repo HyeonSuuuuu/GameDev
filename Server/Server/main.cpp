@@ -1,5 +1,3 @@
-#include <print>
-
 import EchoServer;
 import Common;
 
@@ -13,9 +11,8 @@ int main()
 
 	server.InitEnvironment();
 	server.InitSocket();
-	server.BindandListen(SERVER_PORT);
-	server.StartServer(MAX_CLIENT);
-	std::print("아무 키나 누를 때까지 대기합니다\n");
+	server.BindandListen(11021);
+	server.StartServer(100);
 
 	while (true)
 	{

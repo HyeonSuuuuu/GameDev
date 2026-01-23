@@ -6,10 +6,8 @@ module;
 #pragma comment(lib, "ws2_32.lib")
 
 export module IOCPNetwork;
-
 import Common;
 import Define;
-
 
 export class IOCPNetwork
 {

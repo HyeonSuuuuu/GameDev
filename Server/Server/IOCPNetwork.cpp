@@ -3,9 +3,8 @@ module;
 #include <Ws2tcpip.h>
 
 module IOCPNetwork;
+import Log;
 
-import Common;
-import Define;
 
 IOCPNetwork::~IOCPNetwork()
 {
@@ -25,17 +24,17 @@ bool IOCPNetwork::InitSocket()
 	int32 ret = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (ret != 0)
 	{
-		std::print("[에러] WSAStartup() 실패 : {:d}\n", WSAGetLastError());
+		Log::Error("WSAStartup() 실패 : {}", WSAGetLastError());
 		return false;
 	}
 
 	m_listenSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);
 	if (m_listenSocket == INVALID_SOCKET)
 	{
-		std::print("[에러] socket() 실패 : {:d}\n", WSAGetLastError());
+		Log::Error("socket() 실패 : {}", WSAGetLastError());
 	}
 
-	std::print("소켓 초기화 성공\n");
+	Log::Success("소켓 초기화 성공");
 	return true;
 }
 
@@ -49,18 +48,18 @@ bool IOCPNetwork::BindandListen(const int32 port)
 	int32 ret = bind(m_listenSocket, (SOCKADDR*)&serverAddr, sizeof(SOCKADDR_IN));
 	if (ret != 0)
 	{
-		std::print("[에러] bind() 실패 : {:d}\n", WSAGetLastError());
+		Log::Error("bind() 실패 : {}", WSAGetLastError());
 		return false;
 	}
 
 	ret = listen(m_listenSocket, 5);
 	if (ret != 0)
 	{
-		std::print("[에러] listen() 실패 : {:d}\n", WSAGetLastError());
+		Log::Error("listen() 실패 : {}", WSAGetLastError());
 		return false;
 	}
 
-	std::print("서버 등록 성공..\n");
+	Log::Success("서버 등록 성공");
 	return true;
 }
 
@@ -71,7 +70,7 @@ bool IOCPNetwork::StartServer(const uint32 maxClientCount)
 	m_IOCPHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, MAX_WORKERTHREAD);
 	if (m_IOCPHandle == nullptr)
 	{
-		std::print("[에러] CreateIoCompletionPort() 실패: {:d}\n", GetLastError());
+		Log::Error("CreateIoCompletionPort() 실패: {}", GetLastError());
 		return false;
 	}
 
@@ -87,7 +86,7 @@ bool IOCPNetwork::StartServer(const uint32 maxClientCount)
 		return false;
 	}
 
-	std::print("서버 시작\n");
+	Log::Success("서버 시작");
 	return true;
 }
 
@@ -131,7 +130,7 @@ bool IOCPNetwork::CreateWorkerThread()
 		m_IOWorkerThreads.emplace_back([this]() { WorkerThread(); });
 	}
 
-	std::print("WorkerThread 시작\n");
+	Log::Success("{}개의 Worker Thread 생성 완료", MAX_WORKERTHREAD);
 	return true;
 }
 
@@ -139,7 +138,7 @@ bool IOCPNetwork::CreateAccepterThread()
 {
 	m_accepterThread = std::thread([this]() { AccepterThread(); });
 		
-	std::print("AccepterThread 시작..\n");
+	Log::Info("AccepterThread 생성 완료");
 	return true;
 }
 
@@ -166,12 +165,12 @@ void IOCPNetwork::WorkerThread()
 
 		if (lpOverlapped == nullptr)
 		{
+			Log::Error("GetQueuedCompletionStatus() 실패: {}", GetLastError());
 			continue;
 		}
 
 		if (!isSuccess || (dwIoSize == 0 && isSuccess))
 		{
-			std::print("socket({:d}) 접속 끊김\n", (int)pClientInfo->m_socketClient);
 			CloseSocket(pClientInfo);
 			continue;
 		}
@@ -193,7 +192,7 @@ void IOCPNetwork::WorkerThread()
 		}
 		else
 		{
-			std::print("socket({:d}에서 예외상황\n", (int)pClientInfo->m_socketClient);
+			Log::Warning("socket({:d}에서 예외상황", (int)pClientInfo->m_socketClient);
 		}
 	}
 		
@@ -209,31 +208,34 @@ void IOCPNetwork::AccepterThread()
 		ClientInfo* pClientInfo = GetEmptyClientInfo();
 		if (pClientInfo == nullptr)
 		{
-			std::print("[에러] Client Full\n");
+			Log::Warning("Client Full");
 			return;
 		}
 			
 		pClientInfo->m_socketClient = accept(m_listenSocket, (SOCKADDR*)&clientAddr, &addrLen);
 		if (pClientInfo->m_socketClient == INVALID_SOCKET)
 		{
+			Log::Error("accept() 함수 실패: {}", WSAGetLastError());
 			continue;
 		}
 
 		bool ret = BindIOCompletionPort(pClientInfo);
 		if (ret == false)
 		{
+			Log::Error("IOCP 바인딩 실패 (Index: {})", pClientInfo->m_index);
 			return;
 		}
 			
 		ret = BindRecv(pClientInfo);
 		if (ret == false)
 		{
+			Log::Error("초기 Recv 등록 실패 (Index: {})", pClientInfo->m_index);
 			return;
 		}
 
 		char clientIP[INET_ADDRSTRLEN] {};
 		inet_ntop(AF_INET, &(clientAddr.sin_addr), clientIP, sizeof(clientIP));
-		std::print("클라이언트 접속 : IP{:s} SOCKET({:d})\n", clientIP, pClientInfo->m_socketClient);
+		Log::Success("클라이언트 접속 : IP{:s} SOCKET({:d})", clientIP, pClientInfo->m_socketClient);
 
 		OnConnect(pClientInfo->m_index);
 		++m_clientCnt;
@@ -268,7 +270,7 @@ bool IOCPNetwork::BindIOCompletionPort(ClientInfo* pClientInfo)
 		
 	if (hIOCP == nullptr || m_IOCPHandle != hIOCP)
 	{
-		std::print("[에러] CreateCompletionPort() 실패: {:d}\n", GetLastError());
+		Log::Error("CreateCompletionPort() 실패: {}", GetLastError());
 		return false;
 	}
 
@@ -294,7 +296,7 @@ bool IOCPNetwork::BindRecv(ClientInfo* pClientInfo)
 
 	if (ret == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
 	{
-		std::print("[에러] WSARecv() 실패 : {:d}\n", WSAGetLastError());
+		Log::Error("WSARecv() 실패 : {}", WSAGetLastError());
 		return false;
 	}
 
@@ -320,7 +322,7 @@ bool IOCPNetwork::SendMsg(ClientInfo* pClientInfo, char* pMsg, int len)
 
 	if (ret == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
 	{
-		std::print("[에러] WSASend() 실패 : {:d}\n", WSAGetLastError());
+		Log::Error("WSASend() 실패 : {}", WSAGetLastError());
 		return false;
 	}
 	return true;

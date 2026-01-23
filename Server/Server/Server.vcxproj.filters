@@ -1,19 +1,43 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="Foundation">
+      <UniqueIdentifier>{13312596-9456-41b0-b453-6123029b11e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Definition">
+      <UniqueIdentifier>{69eb91d0-23e6-4164-80d6-d37ad85041b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Network">
+      <UniqueIdentifier>{1c7d6802-845f-4b1a-bb55-43917e0932e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application">
+      <UniqueIdentifier>{e6b54be2-3e61-4570-8fc1-44c86241aea2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="IOCPNetwork.ixx" />
-    <ClCompile Include="IOCPNetwork.cpp" />
-    <ClCompile Include="Common.ixx" />
-    <ClCompile Include="Types.ixx" />
-    <ClCompile Include="Log.ixx" />
-    <ClCompile Include="Define.ixx" />
-    <ClCompile Include="EchoServer.ixx" />
+    <ClCompile Include="Common.ixx">
+      <Filter>Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="Types.ixx">
+      <Filter>Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="Define.ixx">
+      <Filter>Definition</Filter>
+    </ClCompile>
+    <ClCompile Include="IOCPNetwork.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="IOCPNetwork.ixx">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="EchoServer.ixx">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Log.ixx">
+      <Filter>Foundation</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
