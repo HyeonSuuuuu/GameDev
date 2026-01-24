@@ -39,5 +39,8 @@
     <ClCompile Include="Log.ixx">
       <Filter>Foundation</Filter>
     </ClCompile>
+    <ClCompile Include="Session.ixx">
+      <Filter>Definition</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

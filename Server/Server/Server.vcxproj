@@ -138,6 +138,7 @@
     <ClCompile Include="IOCPNetwork.ixx" />
     <ClCompile Include="Log.ixx" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Session.ixx" />
     <ClCompile Include="Types.ixx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

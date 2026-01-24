@@ -1,13 +1,13 @@
 module;
-#define WIN32_LEAN_AND_MEAN
 
-#include <winsock2.h>
-#include <Ws2tcpip.h>
-#pragma comment(lib, "ws2_32.lib")
 
 export module IOCPNetwork;
 import Common;
 import Define;
+import <winSock2.h>;
+
+#pragma comment(lib, "ws2_32.lib")
+import <Ws2tcpip.h>;
 
 export class IOCPNetwork
 {

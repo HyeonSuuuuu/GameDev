@@ -1,9 +1,6 @@
-module;
-#include <winsock2.h>
-#include <ws2tcpip.h>
-
 export module Define;
 import Common;
+import <winSock2.h>;
 
 export {
 	constexpr int16 MAX_SOCKBUF = 1024;
