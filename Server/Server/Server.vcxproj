@@ -143,6 +143,9 @@
     <ClCompile Include="Session.ixx" />
     <ClCompile Include="Types.ixx" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Macro.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

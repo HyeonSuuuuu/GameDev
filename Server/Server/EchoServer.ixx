@@ -75,7 +75,7 @@ private:
 		}
 		PacketData packetData{ std::move(m_packetDataQueue.front()) };
 		m_packetDataQueue.pop_front();
-		return packetData;
+		return std::move(packetData);
 	}
 	bool m_isRunProcessThread = false;
 	std::thread m_processThread;

@@ -54,7 +54,7 @@ public:
 			return false;
 		}
 
-		ret = listen(m_listenSocket, 5);
+		ret = listen(m_listenSocket, SOMAXCONN);
 		if (ret != 0)
 		{
 			Log::Error("listen() 실패 : {}", WSAGetLastError());
@@ -87,6 +87,12 @@ public:
 			return false;
 		}
 
+		ret = CreateSenderThread();
+		if (ret == false)
+		{
+			return false;
+		}
+
 		Log::Success("서버 시작");
 		return true;
 	}
@@ -110,11 +116,17 @@ public:
 		{
 			m_accepterThread.join();
 		}
+
+		m_isSenderRun = false;
+		if (m_senderThread.joinable())
+		{
+			m_senderThread.join();
+		}
 	}
 
 	bool SendMsg(const uint32 clientIndex, const std::span<const char> msg)
 	{
-		return m_sessions[clientIndex].SendMsg(msg);
+		return m_sessions[clientIndex]->SendMsg(msg);
 	}
 
 	virtual void OnConnect(const uint32 clientIndex) = 0;
@@ -128,12 +140,13 @@ private:
 		m_sessions.reserve(maxClientCount);
 		for (uint32 i = 0; i < maxClientCount; ++i)
 		{
-			m_sessions.emplace_back(i);
+			auto session = std::make_unique<Session>(i);
+			m_sessions.emplace_back(std::move(session));
 		}
 	}
 	bool CreateWorkerThread()
 	{
-		uint8 threadId = 0;
+		m_isWorkerRun = true;
 		for (int i = 0; i < MAX_WORKERTHREAD; ++i)
 		{
 			m_IOWorkerThreads.emplace_back([this]() { WorkerThread(); });
@@ -144,18 +157,29 @@ private:
 	}
 	bool CreateAccepterThread()
 	{
+		m_isAccepterRun = true;
 		m_accepterThread = std::thread([this]() { AccepterThread(); });
 
 		Log::Info("AccepterThread 생성 완료");
 		return true;
 	}
+
+	bool CreateSenderThread()
+	{
+		m_isSenderRun = true;
+		m_senderThread = std::thread([this]() { SenderThread(); });
+
+		Log::Info("SenderThread 생성 완료");
+		return true;
+	}
+
 	Session* GetEmptySession()
 	{
 		for (auto& session : m_sessions)
 		{
-			if (session.isConnected())
+			if (session->isConnected() == false)
 			{
-				return &session;
+				return session.get();
 			}
 		}
 		return nullptr;
@@ -167,7 +191,7 @@ private:
 		{
 			return nullptr;
 		}
-		return &m_sessions[sessionIndex];
+		return m_sessions[sessionIndex].get();
 	}
 	
 	void WorkerThread()
@@ -213,8 +237,7 @@ private:
 			}
 			else if (IOOperation::SEND == pOverlappedEx->m_operation)
 			{
-				delete[] pOverlappedEx->m_wsaBuf.buf;
-				delete pOverlappedEx;
+				pSession->SendCompleted(dwIoSize);
 				//std::print("[송신] bytes : {:d}\n ", dwIoSize);
 			}
 			else
@@ -249,6 +272,22 @@ private:
 			++m_clientCnt;
 		}
 	}
+
+	void SenderThread()
+	{
+		while (m_isSenderRun)
+		{
+			for (auto& session : m_sessions)
+			{
+				if (session->isConnected() == false)
+				{
+					continue;
+				}
+				session->SendIO();
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(8));
+		}
+	}
 	void CloseSocket(Session* pSession, bool isForce = false)
 	{
 		pSession->Close(isForce);
@@ -257,14 +296,18 @@ private:
 		--m_clientCnt;
 	}
 
-	std::vector<Session> m_sessions;
+	std::vector<std::unique_ptr<Session>> m_sessions;
 	SOCKET m_listenSocket = INVALID_SOCKET;
 	int m_clientCnt = 0;
 		
 	std::vector<std::thread> m_IOWorkerThreads;
 	std::thread m_accepterThread;
+	std::thread m_senderThread;
+
+	bool m_isWorkerRun = false;
+	bool m_isAccepterRun = false;
+	bool m_isSenderRun = false;
+
 	HANDLE m_iocpHandle = INVALID_HANDLE_VALUE;
-	bool m_isWorkerRun = true;
-	bool m_isAccepterRun = true;
-	char m_socketBuf[1024] {};
+
 };

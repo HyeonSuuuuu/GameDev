@@ -18,7 +18,7 @@ public:
 
 	constexpr bool isConnected() const
 	{
-		return m_socket == INVALID_SOCKET;
+		return m_socket != INVALID_SOCKET;
 	}
 
 	constexpr uint32 GetIndex() const
@@ -100,22 +100,44 @@ public:
 		return true;
 	}
 
-	bool SendMsg(const std::span<const char> msg) const
+	bool SendMsg(const std::span<const char> msg)
 	{
-		auto sendOverlappedEx = new OverlappedEx{};
-		sendOverlappedEx->m_wsaBuf.len = msg.size();
-		sendOverlappedEx->m_wsaBuf.buf = new char[msg.size()];
-		CopyMemory(sendOverlappedEx->m_wsaBuf.buf, msg.data(), msg.size());
-		sendOverlappedEx->m_operation = IOOperation::SEND;
+
+		std::lock_guard<std::mutex> lock(m_sendLock);
+		if (msg.size() + m_sendPos > MAX_SOCKBUF)
+		{
+			m_sendPos = 0;
+		}
+
+		char* sendBuf = m_sendBuf + m_sendPos;
+		CopyMemory(sendBuf, msg.data(), msg.size());
+		m_sendPos += msg.size();
+		return true;
+	}
+
+	bool SendIO()
+	{
+		std::lock_guard<std::mutex> lock(m_sendLock);
+		if (m_sendPos <= 0 || m_isSending)
+		{
+			return true;
+		}
+		m_isSending = true;
+
+		CopyMemory(m_sendingBuf, m_sendBuf, m_sendPos);
+
+		m_sendOverlappedEx.m_wsaBuf.len = m_sendPos;
+		m_sendOverlappedEx.m_wsaBuf.buf = m_sendingBuf;
+		m_sendOverlappedEx.m_operation = IOOperation::SEND;
 
 
 		DWORD dwRecvNumBytes = 0;
 		int ret = WSASend(m_socket,
-			&(sendOverlappedEx->m_wsaBuf),
+			&(m_sendOverlappedEx.m_wsaBuf),
 			1,
 			&dwRecvNumBytes,
 			0,
-			reinterpret_cast<LPWSAOVERLAPPED>(sendOverlappedEx),
+			reinterpret_cast<LPWSAOVERLAPPED>(&m_sendOverlappedEx),
 			nullptr);
 
 		if (ret == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
@@ -123,9 +145,15 @@ public:
 			Log::Error("WSASend() 실패 : {}", WSAGetLastError());
 			return false;
 		}
+		m_sendPos = 0;
 		return true;
 	}
 
+	void SendCompleted(const uint32 dataSize)
+	{
+		m_isSending = false;
+		//Log::Info("[송신 완료] bytes : {}", dataSize);
+	}
 
 	bool BindIOCompletionPort(HANDLE iocpHandle) const
 	{
@@ -150,5 +178,14 @@ private:
 	uint32 m_index = 0;
 	SOCKET m_socket = INVALID_SOCKET;
 	OverlappedEx m_recvOverlappedEx{};
+	OverlappedEx m_sendOverlappedEx{};
+
 	char m_recvBuf[MAX_SOCKBUF]{};
+
+	// 1 Send 방식
+	std::mutex m_sendLock;
+	bool m_isSending = false;
+	uint32 m_sendPos = 0;
+	char m_sendBuf[MAX_SOCKBUF]{};
+	char m_sendingBuf[MAX_SOCKBUF]{};
 };

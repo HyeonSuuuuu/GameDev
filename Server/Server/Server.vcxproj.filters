@@ -43,4 +43,9 @@
       <Filter>02_Definition</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Macro.h">
+      <Filter>01_Foundation</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
