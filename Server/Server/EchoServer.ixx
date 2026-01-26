@@ -15,7 +15,7 @@ export class EchoServer : public IOCPNetwork
 		std::print("[OnClose]: Index({})\n", clientIndex);
 	}
 
-	virtual void OnRecv(const uint32 clientIndex, const std::span<char> recvData) override
+	virtual void OnRecv(const uint32 clientIndex, const std::span<const char> recvData) override
 	{
 		std::print("[OnRecv]: Index({}), dataSize({})\n", clientIndex, recvData.size());
 	}

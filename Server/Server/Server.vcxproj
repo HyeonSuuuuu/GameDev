@@ -107,6 +107,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <BuildStlModules>true</BuildStlModules>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -124,6 +125,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <BuildStlModules>true</BuildStlModules>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,7 +136,6 @@
     <ClCompile Include="Common.ixx" />
     <ClCompile Include="Define.ixx" />
     <ClCompile Include="EchoServer.ixx" />
-    <ClCompile Include="IOCPNetwork.cpp" />
     <ClCompile Include="IOCPNetwork.ixx" />
     <ClCompile Include="Log.ixx" />
     <ClCompile Include="main.cpp" />

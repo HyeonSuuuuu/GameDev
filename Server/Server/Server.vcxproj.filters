@@ -1,46 +1,43 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Foundation">
+    <Filter Include="01_Foundation">
       <UniqueIdentifier>{13312596-9456-41b0-b453-6123029b11e4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Definition">
+    <Filter Include="02_Definition">
       <UniqueIdentifier>{69eb91d0-23e6-4164-80d6-d37ad85041b9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Network">
-      <UniqueIdentifier>{1c7d6802-845f-4b1a-bb55-43917e0932e6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Application">
+    <Filter Include="04_Application">
       <UniqueIdentifier>{e6b54be2-3e61-4570-8fc1-44c86241aea2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03_Network">
+      <UniqueIdentifier>{1c7d6802-845f-4b1a-bb55-43917e0932e6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.ixx">
-      <Filter>Foundation</Filter>
+      <Filter>01_Foundation</Filter>
     </ClCompile>
     <ClCompile Include="Types.ixx">
-      <Filter>Foundation</Filter>
+      <Filter>01_Foundation</Filter>
     </ClCompile>
     <ClCompile Include="Define.ixx">
-      <Filter>Definition</Filter>
-    </ClCompile>
-    <ClCompile Include="IOCPNetwork.cpp">
-      <Filter>Network</Filter>
+      <Filter>02_Definition</Filter>
     </ClCompile>
     <ClCompile Include="IOCPNetwork.ixx">
-      <Filter>Network</Filter>
+      <Filter>03_Network</Filter>
     </ClCompile>
     <ClCompile Include="EchoServer.ixx">
-      <Filter>Application</Filter>
+      <Filter>04_Application</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Application</Filter>
+      <Filter>04_Application</Filter>
     </ClCompile>
     <ClCompile Include="Log.ixx">
-      <Filter>Foundation</Filter>
+      <Filter>01_Foundation</Filter>
     </ClCompile>
     <ClCompile Include="Session.ixx">
-      <Filter>Definition</Filter>
+      <Filter>02_Definition</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
