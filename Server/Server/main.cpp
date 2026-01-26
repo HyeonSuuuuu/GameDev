@@ -12,7 +12,7 @@ int main()
 	server.InitEnvironment();
 	server.InitSocket();
 	server.BindandListen(11021);
-	server.StartServer(100);
+	server.Run(100);
 
 	while (true)
 	{
@@ -25,6 +25,6 @@ int main()
 		}
 	}
 
-	server.DestroyThread();
+	server.End();
 	return 0;
 }

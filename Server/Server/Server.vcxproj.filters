@@ -39,5 +39,8 @@
     <ClCompile Include="Session.ixx">
       <Filter>02_Definition</Filter>
     </ClCompile>
+    <ClCompile Include="PacketData.ixx">
+      <Filter>02_Definition</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

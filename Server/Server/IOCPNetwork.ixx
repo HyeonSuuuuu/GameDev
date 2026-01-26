@@ -112,6 +112,11 @@ public:
 		}
 	}
 
+	bool SendMsg(const uint32 clientIndex, const std::span<const char> msg)
+	{
+		return m_sessions[clientIndex].SendMsg(msg);
+	}
+
 	virtual void OnConnect(const uint32 clientIndex) = 0;
 	virtual void OnClose(const uint32 clientIndex) = 0;
 	virtual void OnRecv(const uint32 clientIndex, const std::span<const char> data) = 0;
@@ -155,6 +160,15 @@ private:
 		}
 		return nullptr;
 	}
+
+	Session* GetSession(const uint32 sessionIndex)
+	{
+		if (sessionIndex >= m_sessions.size())
+		{
+			return nullptr;
+		}
+		return &m_sessions[sessionIndex];
+	}
 	
 	void WorkerThread()
 	{
@@ -196,7 +210,6 @@ private:
 				const auto dataSpan{ pSession->GetRecvData(dwIoSize) };
 				OnRecv(pSession->GetIndex(), dataSpan);
 				pSession->BindRecv();
-				pSession->SendMsg(dataSpan);
 			}
 			else if (IOOperation::SEND == pOverlappedEx->m_operation)
 			{

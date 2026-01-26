@@ -139,6 +139,7 @@
     <ClCompile Include="IOCPNetwork.ixx" />
     <ClCompile Include="Log.ixx" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PacketData.ixx" />
     <ClCompile Include="Session.ixx" />
     <ClCompile Include="Types.ixx" />
   </ItemGroup>
