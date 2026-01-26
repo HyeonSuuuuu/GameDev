@@ -22,7 +22,7 @@ public:
 
 	virtual void OnRecv(const uint32 clientIndex, const std::span<const char> recvData) override
 	{
-		std::print("[OnRecv]: Index({}), dataSize({})\n", clientIndex, recvData.size());
+		//std::print("[OnRecv]: Index({}), dataSize({})\n", clientIndex, recvData.size());
 	
 		PacketData packet{ clientIndex, recvData };
 		std::lock_guard<std::mutex> guard{ m_lock };

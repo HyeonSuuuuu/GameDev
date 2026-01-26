@@ -215,7 +215,7 @@ private:
 			{
 				delete[] pOverlappedEx->m_wsaBuf.buf;
 				delete pOverlappedEx;
-				std::print("[송신] bytes : {:d}\n ", dwIoSize);
+				//std::print("[송신] bytes : {:d}\n ", dwIoSize);
 			}
 			else
 			{
