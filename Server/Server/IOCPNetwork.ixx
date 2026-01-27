@@ -18,6 +18,8 @@ public:
 		
 	bool InitEnvironment()
 	{
+		// 간혹 서버 주고받는 데이터가 utf-8이 아니라 cp-949임. 윈10 구버전에서 그러는거 같음
+		std::locale::global(std::locale("ko_KR.UTF-8"));
 		return true;
 	}
 	bool InitSocket()
@@ -87,12 +89,6 @@ public:
 			return false;
 		}
 
-		ret = CreateSenderThread();
-		if (ret == false)
-		{
-			return false;
-		}
-
 		Log::Success("서버 시작");
 		return true;
 	}
@@ -115,12 +111,6 @@ public:
 		if (m_accepterThread.joinable())
 		{
 			m_accepterThread.join();
-		}
-
-		m_isSenderRun = false;
-		if (m_senderThread.joinable())
-		{
-			m_senderThread.join();
 		}
 	}
 
@@ -161,15 +151,6 @@ private:
 		m_accepterThread = std::thread([this]() { AccepterThread(); });
 
 		Log::Info("AccepterThread 생성 완료");
-		return true;
-	}
-
-	bool CreateSenderThread()
-	{
-		m_isSenderRun = true;
-		m_senderThread = std::thread([this]() { SenderThread(); });
-
-		Log::Info("SenderThread 생성 완료");
 		return true;
 	}
 
@@ -237,7 +218,7 @@ private:
 			}
 			else if (IOOperation::SEND == pOverlappedEx->m_operation)
 			{
-				pSession->SendCompleted(dwIoSize);
+				pSession->SendCompleted(dwIoSize, pOverlappedEx);
 				//std::print("[송신] bytes : {:d}\n ", dwIoSize);
 			}
 			else
@@ -273,21 +254,6 @@ private:
 		}
 	}
 
-	void SenderThread()
-	{
-		while (m_isSenderRun)
-		{
-			for (auto& session : m_sessions)
-			{
-				if (session->isConnected() == false)
-				{
-					continue;
-				}
-				session->SendIO();
-			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(8));
-		}
-	}
 	void CloseSocket(Session* pSession, bool isForce = false)
 	{
 		pSession->Close(isForce);
@@ -302,11 +268,9 @@ private:
 		
 	std::vector<std::thread> m_IOWorkerThreads;
 	std::thread m_accepterThread;
-	std::thread m_senderThread;
 
 	bool m_isWorkerRun = false;
 	bool m_isAccepterRun = false;
-	bool m_isSenderRun = false;
 
 	HANDLE m_iocpHandle = INVALID_HANDLE_VALUE;
 

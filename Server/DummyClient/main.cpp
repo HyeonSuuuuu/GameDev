@@ -64,6 +64,7 @@ void ConnectAndEcho(const std::string& ip, int port)
 
 
 int main() {
+    std::locale::global(std::locale("ko_KR.UTF-8"));
     // 1. 윈속 초기화
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
