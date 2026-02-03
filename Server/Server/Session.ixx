@@ -1,9 +1,16 @@
+module;
+#define WIN32_LEAN_AND_MEAN
+#include <winSock2.h>;
+#include <ws2tcpip.h>;
+#include <mswsock.h>
+
+#pragma comment(lib, "mswsock.lib")
+
 export module Session;
 import Common;
 import Define;
 import Log;
-import <winSock2.h>;
-import <ws2tcpip.h>;
+
 
 export class Session
 {
@@ -18,7 +25,7 @@ public:
 
 	constexpr bool isConnected() const
 	{
-		return m_socket != INVALID_SOCKET;
+		return m_isConnect == true;
 	}
 
 	constexpr uint32 GetIndex() const
@@ -39,6 +46,7 @@ public:
 	bool OnConnect(HANDLE iocpHandle, SOCKET socket)
 	{
 		m_socket = socket;
+		m_isConnect = true;
 		bool ret = BindIOCompletionPort(iocpHandle);
 		if (ret == false)
 		{
@@ -52,7 +60,8 @@ public:
 			Log::Error("초기 Recv 등록 실패 (Index: {})", m_index);
 			return false;
 		}
-
+		
+		m_uid++;
 		return true;
 	}
 
@@ -70,14 +79,64 @@ public:
 
 		setsockopt(m_socket, SOL_SOCKET, SO_LINGER, (char*)&lingerOpt, sizeof(lingerOpt));
 
+		m_isConnect = false;
+
 		closesocket(m_socket);
 		m_socket = INVALID_SOCKET;
+	}
+
+	bool PostAccept(SOCKET listenSock)
+	{
+		m_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_IP, nullptr, 0, WSA_FLAG_OVERLAPPED);
+		if (m_socket == INVALID_SOCKET)
+		{
+			Log::Error("client WSASocket() 실패 : {}", GetLastError());
+			return false;
+		}
+		DWORD bytes = 0;
+		DWORD flags = 0;
+
+		ZeroMemory(&m_acceptOverlappedEx, sizeof(OverlappedEx));
+
+		m_acceptOverlappedEx.m_wsaBuf.len = 0;
+		m_acceptOverlappedEx.m_wsaBuf.buf = nullptr;
+		m_acceptOverlappedEx.m_operation = IOOperation::ACCEPT;
+		m_acceptOverlappedEx.m_sessionIdex = m_index;
+		
+		if (AcceptEx(listenSock, m_socket, m_acceptBuf, 0, sizeof(SOCKADDR_IN) + 16,
+			sizeof(SOCKADDR_IN) + 16, &bytes, (LPWSAOVERLAPPED) & (m_acceptOverlappedEx)) == false)
+		{
+			if (WSAGetLastError() != WSA_IO_PENDING)
+			{
+				Log::Error("AcceptEx Error : {}", GetLastError());
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool AcceptCompleted(HANDLE iocpHandle)
+	{
+		Log::Info("AcceptCompletion : SessionIndex({})", m_index);
+		if (OnConnect(iocpHandle, m_socket) == false)
+		{
+			return false;
+		}
+
+		sockaddr_in clientAddr{};
+		int32 addrLen = sizeof(sockaddr_in);
+		char clientIP[32] = { 0 };
+		inet_ntop(AF_INET, &(clientAddr.sin_addr), clientIP, 32 - 1);
+		Log::Info("클라이언트 접속 : IP({}) SOCKET({})", clientIP, m_socket);
 	}
 
 	bool BindRecv()
 	{
 		DWORD dwFlag = 0;
 		DWORD dwRecvNumBytes = 0;
+
+		ZeroMemory(&m_recvOverlappedEx, sizeof(OverlappedEx));
 
 		m_recvOverlappedEx.m_wsaBuf.len = MAX_SOCKBUF;
 		m_recvOverlappedEx.m_wsaBuf.buf = m_recvBuf;
@@ -182,14 +241,21 @@ public:
 
 private:
 	uint32 m_index = 0;
-	SOCKET m_socket = INVALID_SOCKET;
-	OverlappedEx m_recvOverlappedEx{};
+	uint32 m_uid = 0;
 
+	bool m_isConnect = false;
+
+	SOCKET m_socket = INVALID_SOCKET;
+	
+	// Accept
+	OverlappedEx m_acceptOverlappedEx{};
+	char m_acceptBuf[64];
+
+	// Recv
+	OverlappedEx m_recvOverlappedEx{};
 	char m_recvBuf[MAX_SOCKBUF]{};
 
-	// 1 Send 방식
+	// Send (queue 사용)
 	std::mutex m_sendLock;
-	
-	// SendData Queue
 	std::deque<OverlappedEx*> m_sendDataQueue;
 };

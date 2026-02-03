@@ -5,6 +5,7 @@ import Common;
 import Define;
 import Log;
 import Session;
+import SessionManager;
 #pragma comment(lib, "ws2_32.lib")
 
 export class IOCPNetwork
@@ -77,16 +78,31 @@ public:
 			return false;
 		}
 
+		HANDLE hIOCP = CreateIoCompletionPort((HANDLE)m_listenSocket, m_iocpHandle, (ULONG_PTR)0, 0);
+		if (hIOCP == nullptr || hIOCP != m_iocpHandle)
+		{
+			Log::Error("ListenSocket IOCP 등록 실패 : {}", GetLastError());
+			return false;
+		}
+
 		bool ret = CreateWorkerThread();
 		if (ret == false)
 		{
 			return false;
 		}
 
-		ret = CreateAccepterThread();
-		if (ret == false)
+		for (int i = 0; i < 10; ++i)
 		{
-			return false;
+			Session* session = m_sessionManager->GetEmptySession();
+			if (session == nullptr)
+			{
+				Log::Error("초기 세션 부족");
+				break;
+			}
+			if (session->PostAccept(m_listenSocket) == false)
+			{
+				m_sessionManager->ReturnSession(session);
+			}
 		}
 
 		Log::Success("서버 시작");
@@ -105,18 +121,12 @@ public:
 			}
 		}
 
-		m_isAccepterRun = false;
 		closesocket(m_listenSocket);
-
-		if (m_accepterThread.joinable())
-		{
-			m_accepterThread.join();
-		}
 	}
 
 	bool SendMsg(const uint32 clientIndex, const std::span<const char> msg)
 	{
-		return m_sessions[clientIndex]->SendMsg(msg);
+		return m_sessionManager->SendPacket(clientIndex, msg);
 	}
 
 	virtual void OnConnect(const uint32 clientIndex) = 0;
@@ -125,14 +135,10 @@ public:
 
 
 private:
+
 	void CreateClient(const uint32 maxClientCount)
 	{
-		m_sessions.reserve(maxClientCount);
-		for (uint32 i = 0; i < maxClientCount; ++i)
-		{
-			auto session = std::make_unique<Session>(i);
-			m_sessions.emplace_back(std::move(session));
-		}
+		m_sessionManager = std::make_unique<SessionManager>(maxClientCount);
 	}
 	bool CreateWorkerThread()
 	{
@@ -144,35 +150,6 @@ private:
 
 		Log::Success("{}개의 Worker Thread 생성 완료", MAX_WORKERTHREAD);
 		return true;
-	}
-	bool CreateAccepterThread()
-	{
-		m_isAccepterRun = true;
-		m_accepterThread = std::thread([this]() { AccepterThread(); });
-
-		Log::Info("AccepterThread 생성 완료");
-		return true;
-	}
-
-	Session* GetEmptySession()
-	{
-		for (auto& session : m_sessions)
-		{
-			if (session->isConnected() == false)
-			{
-				return session.get();
-			}
-		}
-		return nullptr;
-	}
-
-	Session* GetSession(const uint32 sessionIndex)
-	{
-		if (sessionIndex >= m_sessions.size())
-		{
-			return nullptr;
-		}
-		return m_sessions[sessionIndex].get();
 	}
 	
 	void WorkerThread()
@@ -202,13 +179,36 @@ private:
 				continue;
 			}
 
-			if (!isSuccess || (dwIoSize == 0 && isSuccess))
+			OverlappedEx* pOverlappedEx = (OverlappedEx*)lpOverlapped;
+
+			if (IOOperation::ACCEPT == pOverlappedEx->m_operation)
 			{
-				CloseSocket(pSession);
+				pSession = m_sessionManager->GetSession(pOverlappedEx->m_sessionIdex);
+				if (pSession)
+				{
+					pSession->AcceptCompleted(m_iocpHandle);
+					m_clientCnt++;
+					Session* session = m_sessionManager->GetEmptySession();
+					if (session == nullptr)
+					{
+						Log::Error("초기 세션 부족");
+					}
+					else if (session->PostAccept(m_listenSocket) == false)
+					{
+						m_sessionManager->ReturnSession(session);
+					}
+				}
 				continue;
 			}
 
-			OverlappedEx* pOverlappedEx = (OverlappedEx*)lpOverlapped;
+			if (!isSuccess || (dwIoSize == 0 && isSuccess))
+			{
+				if (pSession)
+				{
+					CloseSocket(pSession->GetIndex());
+				}
+				continue;
+			}
 
 			if (IOOperation::RECV == pOverlappedEx->m_operation)
 			{
@@ -227,50 +227,22 @@ private:
 			}
 		}
 	}
-	void AccepterThread()
+
+	void CloseSocket(uint32 index, bool isForce = false)
 	{
-		sockaddr_in clientAddr{};
-		int32 addrLen = sizeof(sockaddr_in);
-
-		while (m_isAccepterRun)
-		{
-			SOCKET clientSocket = accept(m_listenSocket, (SOCKADDR*)&clientAddr, &addrLen);
-			if (clientSocket == INVALID_SOCKET)
-			{
-				Log::Error("accept() 함수 실패: {}", WSAGetLastError());
-				continue;
-			}
-			Session* pSession = GetEmptySession();
-			if (pSession == nullptr)
-			{
-				Log::Warning("Client Full");
-				return;
-			}
-			
-			pSession->OnConnect(m_iocpHandle, clientSocket);
-
-			OnConnect(pSession->GetIndex());
-			++m_clientCnt;
-		}
-	}
-
-	void CloseSocket(Session* pSession, bool isForce = false)
-	{
-		pSession->Close(isForce);
-
-		OnClose(pSession->GetIndex());
+		m_sessionManager->Close(index, isForce);
+		OnClose(index);
+		m_sessionManager->ReturnSession(index); 
 		--m_clientCnt;
 	}
 
-	std::vector<std::unique_ptr<Session>> m_sessions;
 	SOCKET m_listenSocket = INVALID_SOCKET;
+	std::unique_ptr<SessionManager> m_sessionManager;
 	int m_clientCnt = 0;
-		
-	std::vector<std::thread> m_IOWorkerThreads;
-	std::thread m_accepterThread;
 
+	std::vector<std::thread> m_IOWorkerThreads;
 	bool m_isWorkerRun = false;
-	bool m_isAccepterRun = false;
+
 
 	HANDLE m_iocpHandle = INVALID_HANDLE_VALUE;
 

@@ -141,6 +141,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PacketData.ixx" />
     <ClCompile Include="Session.ixx" />
+    <ClCompile Include="SessionManager.ixx" />
     <ClCompile Include="Types.ixx" />
   </ItemGroup>
   <ItemGroup>

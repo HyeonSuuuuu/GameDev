@@ -42,6 +42,9 @@
     <ClCompile Include="PacketData.ixx">
       <Filter>02_Definition</Filter>
     </ClCompile>
+    <ClCompile Include="SessionManager.ixx">
+      <Filter>02_Definition</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Macro.h">
