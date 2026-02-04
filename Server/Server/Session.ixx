@@ -53,13 +53,6 @@ public:
 			Log::Error("IOCP 바인딩 실패 (Index: {})", m_index);
 			return false;
 		}
-
-		ret = BindRecv();
-		if (ret == false)
-		{
-			Log::Error("초기 Recv 등록 실패 (Index: {})", m_index);
-			return false;
-		}
 		
 		m_uid++;
 		return true;

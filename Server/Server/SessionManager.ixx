@@ -59,6 +59,11 @@ public:
 		return m_sessions[index]->SendMsg(msg);
 	}
 
+	bool BindRecv(uint32 index)
+	{
+		return m_sessions[index]->BindRecv();
+	}
+
 	// 수정예정
 	Session* GetEmptySession()
 	{

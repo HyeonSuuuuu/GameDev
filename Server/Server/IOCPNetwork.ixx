@@ -134,6 +134,12 @@ public:
 	virtual void OnRecv(const uint32 clientIndex, const std::span<const char> data) = 0;
 
 
+protected:
+	bool BindRecv(uint32 index)
+	{
+		return m_sessionManager->BindRecv(index);
+	}
+
 private:
 
 	void CreateClient(const uint32 maxClientCount)
@@ -187,6 +193,7 @@ private:
 				if (pSession)
 				{
 					pSession->AcceptCompleted(m_iocpHandle);
+					OnConnect(pSession->GetIndex());
 					m_clientCnt++;
 					Session* session = m_sessionManager->GetEmptySession();
 					if (session == nullptr)

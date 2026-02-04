@@ -3,6 +3,7 @@ export module EchoServer;
 import IOCPNetwork;
 import Common;
 import PacketData;
+import Log;
 
 export class EchoServer : public IOCPNetwork
 {
@@ -12,6 +13,12 @@ public:
 	
 	virtual void OnConnect(const uint32 clientIndex) override
 	{
+		bool ret = BindRecv(clientIndex);
+		if (ret == false)
+		{
+			Log::Error("초기 Recv 등록 실패 (Index: {})", clientIndex);
+			return;
+		}
 		std::print("[Onconnect]: Index({})\n", clientIndex);
 	}
 		
