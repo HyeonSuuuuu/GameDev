@@ -62,7 +62,7 @@ struct PacketHeader
 {
 	uint16 size;
 	uint16 id;
-	uint8 type; // ¾ĞÃà¿©ºÎ, ¾ÏÈ£È­ ¿©ºÎ µî ¼Ó¼ºÀ» ¾Ë¾Æ³»´Â °ª
+	uint8 type; // ì••ì¶•ì—¬ë¶€, ì•”í˜¸í™” ì—¬ë¶€ ë“± ì†ì„±ì„ ì•Œì•„ë‚´ëŠ” ê°’
 };
 
 constexpr uint32 PACKET_HEADER_SIZE = sizeof(PacketHeader);
@@ -70,20 +70,20 @@ constexpr uint32 PACKET_HEADER_SIZE = sizeof(PacketHeader);
 
 constexpr int32 MAX_USER_ID_LEN = 32;
 constexpr int32 MAX_USER_PW_LEN = 32;
-// ·Î±×ÀÎ ¿äÃ»
+// ë¡œê·¸ì¸ ìš”ì²­
 struct CS_Login : public PacketHeader
 {
 	char userID[MAX_USER_ID_LEN + 1];
 	char userPW[MAX_USER_PW_LEN + 1];
 };
 constexpr uint32 CS_LOGIN_REQUEST_SIZE = sizeof(CS_Login);
-// ·Î±×ÀÎ ÀÀ´ä
+// ë¡œê·¸ì¸ ì‘ë‹µ
 struct SC_Login : public PacketHeader
 {
 	uint8 result;
 };
 
-// ·ë ÀÔÀå ¿äÃ»
+// ë£¸ ì…ì¥ ìš”ì²­
 struct CS_RoomEnter : public PacketHeader
 {
 	uint32 roomIndex;
@@ -93,18 +93,18 @@ struct SC_RoomEnter : public PacketHeader
 {
 	uint8 result;
 	uint32 myUserIndex;
-	// PlayerInfo ¼ö
-	// ÇöÀç ¹æ À¯Àú Á¤º¸¸¦ ¸®½ºÆ® ÇüÅÂ·Î º¸³¿ (°¡º¯)
+	// PlayerInfo ìˆ˜
+	// í˜„ì¬ ë°© ìœ ì € ì •ë³´ë¥¼ ë¦¬ìŠ¤íŠ¸ í˜•íƒœë¡œ ë³´ëƒ„ (ê°€ë³€)
 };
 
 struct SC_RoomEnterNotify : public PacketHeader
 {
 	char userID[MAX_USER_ID_LEN + 1];
 	uint32 userIndex;
-	float x, y, z; // ÃÊ±â À§Ä¡ Á¤º¸
+	float x, y, z; // ì´ˆê¸° ìœ„ì¹˜ ì •ë³´
 };
 
-// ·ë ³ª°¡±â ¿äÃ»
+// ë£¸ ë‚˜ê°€ê¸° ìš”ì²­
 struct CS_RoomLeave : public PacketHeader
 {
 };
@@ -119,7 +119,7 @@ struct SC_RoomLeaveNotify : public PacketHeader
 	uint32 userIndex;
 };
 
-// ·ë Ã¤ÆÃ
+// ë£¸ ì±„íŒ…
 constexpr int32 MAX_CHAT_MSG_LEN = 256;
 struct CS_RoomChat : public PacketHeader
 {
