@@ -10,32 +10,32 @@
 
 using namespace std;
 
-// ¼ö½Å Àü¿ë ¾²·¹µå ÇÔ¼ö
+// ìˆ˜ì‹  ì „ìš© ì“°ë ˆë“œ í•¨ìˆ˜
 void ReceiveThread(SOCKET sock) {
     while (true) {
-        // 1. Çì´õ ¼ö½Å
+        // 1. í—¤ë” ìˆ˜ì‹ 
         PacketHeader header;
         int received = 0;
         int targetSize = PACKET_HEADER_SIZE;
 
-        // TCP´Â µ¥ÀÌÅÍ°¡ ÂÉ°³Áú ¼ö ÀÖÀ¸¹Ç·Î Çì´õ°¡ ´Ù ¿Ã ¶§±îÁö ¹İº¹ÇØ¼­ recv
+        // TCPëŠ” ë°ì´í„°ê°€ ìª¼ê°œì§ˆ ìˆ˜ ìˆìœ¼ë¯€ë¡œ í—¤ë”ê°€ ë‹¤ ì˜¬ ë•Œê¹Œì§€ ë°˜ë³µí•´ì„œ recv
         while (received < targetSize) {
-            int n = recv(sock, reinterpret_cast<char*>(&header) + received, targetSize - received, 0); // recv(sock, ÇöÀç Ã¤¿ö¾ß ÇÒ À§Ä¡ÀÇ ÁÖ¼Ò, ³²Àº Å©±â, 0)
+            int n = recv(sock, reinterpret_cast<char*>(&header) + received, targetSize - received, 0); // recv(sock, í˜„ì¬ ì±„ì›Œì•¼ í•  ìœ„ì¹˜ì˜ ì£¼ì†Œ, ë‚¨ì€ í¬ê¸°, 0)
 
-            if (n <= 0) { // ¼­¹ö°¡ ¿¬°áÀ» ²÷°Å³ª(0) ¿¡·¯°¡ ¹ß»ı(-1)ÇÏ¸é ¾²·¹µå Á¾·á
-                cout << "[¼ö½Å] ¼­¹ö ¿¬°á Á¾·á" << endl;
+            if (n <= 0) { // ì„œë²„ê°€ ì—°ê²°ì„ ëŠê±°ë‚˜(0) ì—ëŸ¬ê°€ ë°œìƒ(-1)í•˜ë©´ ì“°ë ˆë“œ ì¢…ë£Œ
+                cout << "[ìˆ˜ì‹ ] ì„œë²„ ì—°ê²° ì¢…ë£Œ" << endl;
                 return;
             }
-            received += n; // ½ÇÁ¦·Î ¹ŞÀº ¹ÙÀÌÆ® ¼ö¸¸Å­ ´©Àû
+            received += n; // ì‹¤ì œë¡œ ë°›ì€ ë°”ì´íŠ¸ ìˆ˜ë§Œí¼ ëˆ„ì 
         }
 
-        // 2. ID¿¡ µû¸¥ ÆĞÅ¶ Ã³¸® (SC_MOVE_NOTIFY Ã³¸®)
+        // 2. IDì— ë”°ë¥¸ íŒ¨í‚· ì²˜ë¦¬ (SC_MOVE_NOTIFY ì²˜ë¦¬)
         if (header.id == static_cast<uint16>(PACKET_ID::SC_MOVE_NOTIFY)) {
             SC_MoveNotify notify;
-            // Çì´õ Á¤º¸ º¹»ç
+            // í—¤ë” ì •ë³´ ë³µì‚¬
             memcpy(&notify, &header, PACKET_HEADER_SIZE);
 
-            // ³ª¸ÓÁö µ¥ÀÌÅÍ ¼ö½Å
+            // ë‚˜ë¨¸ì§€ ë°ì´í„° ìˆ˜ì‹ 
             int bodySize = header.size - PACKET_HEADER_SIZE;
             int bodyReceived = 0;
             char* bodyPtr = reinterpret_cast<char*>(&notify) + PACKET_HEADER_SIZE;
@@ -46,12 +46,12 @@ void ReceiveThread(SOCKET sock) {
                 bodyReceived += n;
             }
 
-            // °á°ú Ãâ·Â
+            // ê²°ê³¼ ì¶œë ¥
             cout << "\n[Recv Notify] UserIndex: " << notify.userIndex
                 << " / Pos: (" << notify.x << ", " << notify.y << ", " << notify.z << ")" << endl;
         }
         else {
-            // ´Ù¸¥ ÆĞÅ¶ ID°¡ ¿Ã °æ¿ì: Çì´õ¿¡ ÀûÈù size¸¸Å­ ¹«½ÃÇÏ°í ³Ñ¾î°¡±â
+            // ë‹¤ë¥¸ íŒ¨í‚· IDê°€ ì˜¬ ê²½ìš°: í—¤ë”ì— ì íŒ sizeë§Œí¼ ë¬´ì‹œí•˜ê³  ë„˜ì–´ê°€ê¸°
             int remainSize = header.size - PACKET_HEADER_SIZE;
             vector<char> dummy(remainSize);
             recv(sock, dummy.data(), remainSize, 0);
@@ -62,58 +62,58 @@ void ReceiveThread(SOCKET sock) {
 
 int main()
 {
-	// À©¼Ó ÃÊ±âÈ­ ¹× ¼­¹ö ¿¬°á
+    // ìœˆì† ì´ˆê¸°í™” ë° ì„œë²„ ì—°ê²°
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) return 1;
 
-	// TCP ¼ÒÄÏ »ı¼º
+    // TCP ì†Œì¼“ ìƒì„±
     SOCKET ClientSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-	// ¼­¹ö ÁÖ¼Ò ¼³Á¤
+    // ì„œë²„ ì£¼ì†Œ ì„¤ì •
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(9000);
     inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
 
-	// ¼­¹ö¿¡ ¿¬°á
+    // ì„œë²„ì— ì—°ê²°
     if (connect(ClientSock, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
-        cout << "¼­¹ö ¿¬°á ½ÇÆĞ" << endl;
+        cout << "ì„œë²„ ì—°ê²° ì‹¤íŒ¨" << endl;
         return 1;
     }
-    cout << "¼­¹ö ¿¬°á ¼º°ø" << endl;
+    cout << "ì„œë²„ ì—°ê²° ì„±ê³µ" << endl;
 
-    //¼ö½Å ¾²·¹µå »ı¼º ¹× ½ÃÀÛ
+    //ìˆ˜ì‹  ì“°ë ˆë“œ ìƒì„± ë° ì‹œì‘
     thread t_recv(ReceiveThread, ClientSock);
 
-    // ¼Û½ÅÀº ¸ŞÀÎ ¾²·¹µå¿¡¼­
+    // ì†¡ì‹ ì€ ë©”ì¸ ì“°ë ˆë“œì—ì„œ
     while (true) {
         CS_Move movePkt;
 
-        // Çì´õ ¼³Á¤
+        // í—¤ë” ì„¤ì •
         movePkt.size = sizeof(CS_Move);
         movePkt.id = static_cast<uint16>(PACKET_ID::CS_MOVE);
-        movePkt.type = 0; // ¼Ó¼º°ª ÀÏ´Ü 0À¸·Î ¼³Á¤
+        movePkt.type = 0; // ì†ì„±ê°’ ì¼ë‹¨ 0ìœ¼ë¡œ ì„¤ì •
 
-        // µ¥ÀÌÅÍ ¼³Á¤
+        // ë°ì´í„° ì„¤ì •
         movePkt.inputFlag = 1;
         movePkt.x = 0.0f;
         movePkt.y = 0.0f;
         movePkt.z = 0.0f;
         movePkt.yaw = 45.0f;
 
-        // Àü¼Û
+        // ì „ì†¡
         int sent = send(ClientSock, reinterpret_cast<const char*>(&movePkt), sizeof(CS_Move), 0);
         if (sent == SOCKET_ERROR) break;
 
-        cout << "[Send Move] x: " << movePkt.x << " Àü¼Û ¿Ï·á" << endl;
-        cout << "[Send Move] y: " << movePkt.y << " Àü¼Û ¿Ï·á" << endl;
-        cout << "[Send Move] z: " << movePkt.z << " Àü¼Û ¿Ï·á" << endl;
-        cout << "[Send Move] yaw: " << movePkt.yaw << " Àü¼Û ¿Ï·á" << endl;
+        cout << "[Send Move] x: " << movePkt.x << " ì „ì†¡ ì™„ë£Œ" << endl;
+        cout << "[Send Move] y: " << movePkt.y << " ì „ì†¡ ì™„ë£Œ" << endl;
+        cout << "[Send Move] z: " << movePkt.z << " ì „ì†¡ ì™„ë£Œ" << endl;
+        cout << "[Send Move] yaw: " << movePkt.yaw << " ì „ì†¡ ì™„ë£Œ" << endl;
 
         this_thread::sleep_for(chrono::milliseconds(17));
     }
 
-	t_recv.join(); //¼ö½Å ¾²·¹µå°¡ ³¡³¯ ¶§±îÁö ¸ŞÀÎÀÌ Á¾·áµÇÁö ¾Êµµ·Ï ´ë±â
+    t_recv.join(); //ìˆ˜ì‹  ì“°ë ˆë“œê°€ ëë‚  ë•Œê¹Œì§€ ë©”ì¸ì´ ì¢…ë£Œë˜ì§€ ì•Šë„ë¡ ëŒ€ê¸°
 
     closesocket(ClientSock);
     WSACleanup();
