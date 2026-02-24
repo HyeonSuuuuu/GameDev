@@ -85,6 +85,9 @@ int main()
     //수신 쓰레드 생성 및 시작
     thread t_recv(ReceiveThread, ClientSock);
 
+	// 이전 입력 플래그 저장 변수
+    uint16 BeforeInputFlag = 0;
+
     // 송신은 메인 쓰레드에서
     while (true) {
         CS_Move movePkt;
@@ -95,20 +98,15 @@ int main()
         movePkt.type = 0; // 속성값 일단 0으로 설정
 
         // 데이터 설정
-        movePkt.inputFlag = 1;
-        movePkt.x = 0.0f;
-        movePkt.y = 0.0f;
-        movePkt.z = 0.0f;
-        movePkt.yaw = 45.0f;
+		movePkt.inputFlag = 0; // wasd 입력 플래그 0으로 임의 설정 (언리얼에서 가져오기)
 
-        // 전송
-        int sent = send(ClientSock, reinterpret_cast<const char*>(&movePkt), sizeof(CS_Move), 0);
-        if (sent == SOCKET_ERROR) break;
+		// inputFlag가 바뀌면 패킷 전송
+        if (movePkt.inputFlag != BeforeInputFlag) {
+            int sent = send(ClientSock, reinterpret_cast<const char*>(&movePkt), sizeof(CS_Move), 0);
+            if (sent == SOCKET_ERROR) break;
 
-        cout << "[Send Move] x: " << movePkt.x << " 전송 완료" << endl;
-        cout << "[Send Move] y: " << movePkt.y << " 전송 완료" << endl;
-        cout << "[Send Move] z: " << movePkt.z << " 전송 완료" << endl;
-        cout << "[Send Move] yaw: " << movePkt.yaw << " 전송 완료" << endl;
+            BeforeInputFlag = movePkt.inputFlag;
+        }
 
         this_thread::sleep_for(chrono::milliseconds(17));
     }
