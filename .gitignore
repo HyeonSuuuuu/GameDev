@@ -1,6 +1,16 @@
 # Created by https://www.toptal.com/developers/gitignore/api/windows,visualstudio,c++
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,visualstudio,c++
 
+# AI Library
+AI/lib/*.lib
+AI/lib/*.dll
+*.dll
+*.exe
+
+# AI Models
+*.gguf
+
+
 ### C++ ###
 # Prerequisites
 *.d
