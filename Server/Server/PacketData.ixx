@@ -21,6 +21,8 @@ public:
 			delete[] m_packetData;
 			m_packetData = nullptr;
 		}
+		m_sessionIndex = 0;
+		m_dataSize = 0;
 	}
 	PacketData(const PacketData&) = delete;
 	PacketData& operator=(const PacketData&) = delete;

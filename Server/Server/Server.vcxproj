@@ -133,18 +133,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ChatServer.ixx" />
     <ClCompile Include="Common.ixx" />
     <ClCompile Include="Define.ixx" />
     <ClCompile Include="EchoServer.ixx" />
+    <ClCompile Include="ErrorCode.cpp" />
+    <ClCompile Include="ErrorCode.ixx" />
     <ClCompile Include="IOCPNetwork.ixx" />
-    <ClCompile Include="Log.ixx" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PacketData.ixx" />
     <ClCompile Include="Session.ixx" />
     <ClCompile Include="SessionManager.ixx" />
-    <ClCompile Include="Types.ixx" />
+    <ClCompile Include="User.ixx" />
+    <ClCompile Include="UserManager.ixx" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Common\Log.h" />
+    <ClInclude Include="..\..\Common\Type.h" />
     <ClInclude Include="Macro.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

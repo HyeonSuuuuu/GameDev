@@ -1,54 +1,67 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="01_Foundation">
+    <Filter Include="01_Common">
       <UniqueIdentifier>{13312596-9456-41b0-b453-6123029b11e4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02_Definition">
-      <UniqueIdentifier>{69eb91d0-23e6-4164-80d6-d37ad85041b9}</UniqueIdentifier>
+    <Filter Include="02_Network">
+      <UniqueIdentifier>{1c7d6802-845f-4b1a-bb55-43917e0932e6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="04_Application">
+    <Filter Include="03_Echo">
       <UniqueIdentifier>{e6b54be2-3e61-4570-8fc1-44c86241aea2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03_Network">
-      <UniqueIdentifier>{1c7d6802-845f-4b1a-bb55-43917e0932e6}</UniqueIdentifier>
+    <Filter Include="04_Chat">
+      <UniqueIdentifier>{56ea910b-41de-40f2-982b-b3f24f85a09a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.ixx">
-      <Filter>01_Foundation</Filter>
-    </ClCompile>
-    <ClCompile Include="Types.ixx">
-      <Filter>01_Foundation</Filter>
-    </ClCompile>
-    <ClCompile Include="Define.ixx">
-      <Filter>02_Definition</Filter>
+      <Filter>01_Common</Filter>
     </ClCompile>
     <ClCompile Include="IOCPNetwork.ixx">
-      <Filter>03_Network</Filter>
+      <Filter>02_Network</Filter>
     </ClCompile>
     <ClCompile Include="EchoServer.ixx">
-      <Filter>04_Application</Filter>
+      <Filter>03_Echo</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>04_Application</Filter>
+      <Filter>03_Echo</Filter>
     </ClCompile>
-    <ClCompile Include="Log.ixx">
-      <Filter>01_Foundation</Filter>
+    <ClCompile Include="Define.ixx">
+      <Filter>02_Network</Filter>
     </ClCompile>
     <ClCompile Include="Session.ixx">
-      <Filter>02_Definition</Filter>
-    </ClCompile>
-    <ClCompile Include="PacketData.ixx">
-      <Filter>02_Definition</Filter>
+      <Filter>02_Network</Filter>
     </ClCompile>
     <ClCompile Include="SessionManager.ixx">
-      <Filter>02_Definition</Filter>
+      <Filter>02_Network</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketData.ixx">
+      <Filter>03_Echo</Filter>
+    </ClCompile>
+    <ClCompile Include="ChatServer.ixx">
+      <Filter>04_Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="ErrorCode.cpp">
+      <Filter>04_Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="User.ixx">
+      <Filter>04_Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="ErrorCode.ixx" />
+    <ClCompile Include="UserManager.ixx">
+      <Filter>04_Chat</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Macro.h">
-      <Filter>01_Foundation</Filter>
+      <Filter>01_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Log.h">
+      <Filter>01_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Type.h">
+      <Filter>01_Common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

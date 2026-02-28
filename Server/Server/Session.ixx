@@ -9,7 +9,6 @@ module;
 export module Session;
 import Common;
 import Define;
-import Log;
 
 
 export class Session

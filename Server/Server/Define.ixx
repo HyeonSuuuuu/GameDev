@@ -2,7 +2,8 @@ export module Define;
 import Common;
 import <winSock2.h>;
 
-export {
+export
+{
 	constexpr int16 MAX_SOCKBUF = 1024;
 	constexpr int8 MAX_WORKERTHREAD = 4;
 
@@ -23,4 +24,4 @@ export {
 		IOOperation m_operation;
 		uint32 m_sessionIdex = 0;
 	};
-}
+};

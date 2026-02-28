@@ -3,7 +3,6 @@ import <winsock2.h>;
 import <ws2tcpip.h>;
 import Common;
 import Define;
-import Log;
 import Session;
 import SessionManager;
 #pragma comment(lib, "ws2_32.lib")
@@ -194,7 +193,7 @@ private:
 				{
 					pSession->AcceptCompleted(m_iocpHandle);
 					OnConnect(pSession->GetIndex());
-					m_clientCnt++;
+					m_clientCnt.fetch_add(1);
 					Session* session = m_sessionManager->GetEmptySession();
 					if (session == nullptr)
 					{
@@ -240,12 +239,12 @@ private:
 		m_sessionManager->Close(index, isForce);
 		OnClose(index);
 		m_sessionManager->ReturnSession(index); 
-		--m_clientCnt;
+		m_clientCnt.fetch_sub(1);
 	}
 
 	SOCKET m_listenSocket = INVALID_SOCKET;
 	std::unique_ptr<SessionManager> m_sessionManager;
-	int m_clientCnt = 0;
+	std::atomic<int> m_clientCnt = 0;
 
 	std::vector<std::thread> m_IOWorkerThreads;
 	bool m_isWorkerRun = false;
