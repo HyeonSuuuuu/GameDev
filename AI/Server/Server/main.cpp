@@ -28,7 +28,7 @@ int main()
 
 	sockaddr_in serverAddr;
 	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY); // 게임 서버만 받게
 	serverAddr.sin_port = htons(NetConfig::AI_SERVER_PORT);
 	
 	bind(listenSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
