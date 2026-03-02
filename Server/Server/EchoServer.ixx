@@ -26,7 +26,7 @@ public:
 		std::print("[OnClose]: Index({})\n", clientIndex);
 	}
 
-	virtual void OnRecv(const uint32 clientIndex, const std::span<const char> recvData) override
+	virtual void OnRecv(const uint32 clientIndex, const std::span<const byte> recvData) override
 	{
 		//std::print("[OnRecv]: Index({}), dataSize({})\n", clientIndex, recvData.size());
 	
@@ -62,7 +62,7 @@ private:
 			auto packetOpt = DequePacketData();
 			if (packetOpt.has_value())
 			{
-				std::span<const char>dataSpan{ packetOpt->GetSpanData()};
+				std::span<const byte>dataSpan{ packetOpt->GetSpanData()};
 				SendMsg(packetOpt->GetSessionIndex(), dataSpan);
 			}
 			else

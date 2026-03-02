@@ -1,7 +1,7 @@
 module;
 #define WIN32_LEAN_AND_MEAN
-#include <winSock2.h>;
-#include <ws2tcpip.h>;
+#include <winSock2.h>
+#include <ws2tcpip.h>
 #include <mswsock.h>
 
 #pragma comment(lib, "mswsock.lib")
@@ -32,9 +32,9 @@ public:
 		return m_index;
 	}
 
-	constexpr std::span<const char> GetRecvData(int32 size) const
+	constexpr std::span<const byte> GetRecvData(int32 size) const
 	{
-		return std::span<const char>(m_recvBuf, size);
+		return std::span<const byte>(m_recvBuf, size);
 	}
 
 	constexpr uint64 GetSocketId() const
@@ -79,7 +79,7 @@ public:
 
 	bool PostAccept(SOCKET listenSock)
 	{
-		m_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_IP, nullptr, 0, WSA_FLAG_OVERLAPPED);
+		m_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);
 		if (m_socket == INVALID_SOCKET)
 		{
 			Log::Error("client WSASocket() 실패 : {}", GetLastError());
@@ -90,17 +90,17 @@ public:
 
 		ZeroMemory(&m_acceptOverlappedEx, sizeof(OverlappedEx));
 
-		m_acceptOverlappedEx.m_wsaBuf.len = 0;
-		m_acceptOverlappedEx.m_wsaBuf.buf = nullptr;
+		//m_acceptOverlappedEx.m_wsaBuf.len = 0;
+		//m_acceptOverlappedEx.m_wsaBuf.buf = nullptr;
 		m_acceptOverlappedEx.m_operation = IOOperation::ACCEPT;
 		m_acceptOverlappedEx.m_sessionIdex = m_index;
 		
 		if (AcceptEx(listenSock, m_socket, m_acceptBuf, 0, sizeof(SOCKADDR_IN) + 16,
-			sizeof(SOCKADDR_IN) + 16, &bytes, (LPWSAOVERLAPPED) & (m_acceptOverlappedEx)) == false)
+			sizeof(SOCKADDR_IN) + 16, &bytes, reinterpret_cast<LPWSAOVERLAPPED>(&m_acceptOverlappedEx)) == false)
 		{
 			if (WSAGetLastError() != WSA_IO_PENDING)
 			{
-				Log::Error("AcceptEx Error : {}", GetLastError());
+				Log::Error("AcceptEx Error : {}", WSAGetLastError());
 				return false;
 			}
 		}
@@ -116,11 +116,14 @@ public:
 			return false;
 		}
 
+		// 주소 꺼내오기 Ex 함수 사용해야함
 		sockaddr_in clientAddr{};
 		int32 addrLen = sizeof(sockaddr_in);
 		char clientIP[32] = { 0 };
 		inet_ntop(AF_INET, &(clientAddr.sin_addr), clientIP, 32 - 1);
 		Log::Info("클라이언트 접속 : IP({}) SOCKET({})", clientIP, m_socket);
+
+		return true;
 	}
 
 	bool BindRecv()
@@ -131,7 +134,7 @@ public:
 		ZeroMemory(&m_recvOverlappedEx, sizeof(OverlappedEx));
 
 		m_recvOverlappedEx.m_wsaBuf.len = MAX_SOCKBUF;
-		m_recvOverlappedEx.m_wsaBuf.buf = m_recvBuf;
+		m_recvOverlappedEx.m_wsaBuf.buf = reinterpret_cast<char*>(m_recvBuf);
 		m_recvOverlappedEx.m_operation = IOOperation::RECV;
 
 		int ret = WSARecv(m_socket,
@@ -151,7 +154,7 @@ public:
 		return true;
 	}
 
-	bool SendMsg(const std::span<const char> msg)
+	bool SendMsg(const std::span<const byte> msg)
 	{
 
 		OverlappedEx* sendOverlappedEx = new OverlappedEx();
@@ -159,19 +162,20 @@ public:
 		sendOverlappedEx->m_wsaBuf.buf = new char[msg.size()];
 		sendOverlappedEx->m_operation = IOOperation::SEND;
 		CopyMemory(sendOverlappedEx->m_wsaBuf.buf, msg.data(), msg.size());
-
-		m_sendDataQueue.emplace_back(sendOverlappedEx);
-		
-		if (m_sendDataQueue.size() == 1)
 		{
-			SendIO();
+			std::lock_guard<std::mutex> lock(m_sendLock);
+			m_sendDataQueue.emplace_back(sendOverlappedEx);
+			if (m_sendDataQueue.size() == 1)
+			{
+				SendIO();
+			}
 		}
 		return true;
 	}
 
 	bool SendIO()
 	{
-		std::lock_guard<std::mutex> lock(m_sendLock);
+		// std::lock_guard<std::mutex> lock(m_sendLock);
 
 		if (m_sendDataQueue.empty())
 		{
@@ -245,7 +249,7 @@ private:
 
 	// Recv
 	OverlappedEx m_recvOverlappedEx{};
-	char m_recvBuf[MAX_SOCKBUF]{};
+	byte m_recvBuf[MAX_SOCKBUF]{};
 
 	// Send (queue 사용)
 	std::mutex m_sendLock;

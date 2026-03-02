@@ -1,6 +1,7 @@
 import IOCPNetwork;
 import Common;
-import PacketData;
+import PacketManager;
+import "../../Common/Protocol.h";
 
 
 
@@ -12,6 +13,7 @@ public:
 
 	virtual void OnConnect(const uint32 clientIndex) override
 	{
+		
 		bool ret = BindRecv(clientIndex);
 		if (ret == false)
 		{
@@ -19,6 +21,9 @@ public:
 			return;
 		}
 		std::print("[Onconnect]: Index({})\n", clientIndex);
+		
+		Packet packet{ clientIndex, (uint16)PACKET_ID::SYS_USER_CONNECT, {} };
+		
 	}
 
 	virtual void OnClose(const uint32 clientIndex) override
@@ -26,65 +31,26 @@ public:
 		std::print("[OnClose]: Index({})\n", clientIndex);
 	}
 
-	virtual void OnRecv(const uint32 clientIndex, const std::span<const char> recvData) override
+	virtual void OnRecv(const uint32 clientIndex, const std::span<const byte> recvData) override
 	{
 		//std::print("[OnRecv]: Index({}), dataSize({})\n", clientIndex, recvData.size());
-
-		PacketData packet{ clientIndex, recvData };
-		std::lock_guard<std::mutex> guard{ m_lock };
-		m_packetDataQueue.emplace_back(std::move(packet));
 	}
 
 	void Run(const uint32 maxClient)
 	{
-		m_isRunProcessThread = true;
-		m_processThread = std::thread([this]() { ProcessPacket(); });
-
+		auto sendPacketFunc = [&](uint32 clientIndex, std::span<const byte> dataSpan)
+			{
+				SendMsg(clientIndex, dataSpan);
+			};
 		StartServer(maxClient);
 	}
 
 	void End()
 	{
-		m_isRunProcessThread = false;
-		if (m_processThread.joinable())
-		{
-			m_processThread.join();
-		}
 
 		DestroyThread();
 	}
 
 private:
-	void ProcessPacket()
-	{
-		while (m_isRunProcessThread)
-		{
-			auto packetOpt = DequePacketData();
-			if (packetOpt.has_value())
-			{
-				std::span<const char>dataSpan{ packetOpt->GetSpanData() };
-				SendMsg(packetOpt->GetSessionIndex(), dataSpan);
-			}
-			else
-			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(1));
-			}
-		}
-	}
-
-	std::optional<PacketData> DequePacketData()
-	{
-		std::lock_guard<std::mutex> guard{ m_lock };
-		if (m_packetDataQueue.empty())
-		{
-			return std::nullopt;
-		}
-		PacketData packetData{ std::move(m_packetDataQueue.front()) };
-		m_packetDataQueue.pop_front();
-		return std::move(packetData);
-	}
-	bool m_isRunProcessThread = false;
-	std::thread m_processThread;
-	std::mutex m_lock;
-	std::deque<PacketData> m_packetDataQueue;
+	std::unique_ptr<PacketManager> m_packetManager;
 };

@@ -54,7 +54,7 @@ public:
 		m_sessions[index]->Close(isForce);
 	}
 	
-	bool SendPacket(const uint32 index, const std::span<const char> msg)
+	bool SendPacket(const uint32 index, const std::span<const byte> msg)
 	{
 		return m_sessions[index]->SendMsg(msg);
 	}

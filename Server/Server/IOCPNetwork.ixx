@@ -1,11 +1,15 @@
+module;
+#define WIN32_LEAN_AND_MEAN
+#include <winSock2.h>
+#include <ws2tcpip.h>
+#pragma comment(lib, "ws2_32.lib")
+
 export module IOCPNetwork;
-import <winsock2.h>;
-import <ws2tcpip.h>;
 import Common;
 import Define;
 import Session;
 import SessionManager;
-#pragma comment(lib, "ws2_32.lib")
+
 
 export class IOCPNetwork
 {
@@ -123,14 +127,14 @@ public:
 		closesocket(m_listenSocket);
 	}
 
-	bool SendMsg(const uint32 clientIndex, const std::span<const char> msg)
+	bool SendMsg(const uint32 clientIndex, const std::span<const byte> msg)
 	{
 		return m_sessionManager->SendPacket(clientIndex, msg);
 	}
 
 	virtual void OnConnect(const uint32 clientIndex) = 0;
 	virtual void OnClose(const uint32 clientIndex) = 0;
-	virtual void OnRecv(const uint32 clientIndex, const std::span<const char> data) = 0;
+	virtual void OnRecv(const uint32 clientIndex, const std::span<const byte> data) = 0;
 
 
 protected:

@@ -7,11 +7,11 @@ export class PacketData
 {
 public:
 	PacketData() = delete;
-	PacketData(uint32 sessionIndex, std::span<const char> spanData)
+	PacketData(uint32 sessionIndex, std::span<const byte> spanData)
 		: m_sessionIndex{ sessionIndex }
 		, m_dataSize{ static_cast<uint32>(spanData.size())}
 	{
-		m_packetData = new char[m_dataSize];
+		m_packetData = new byte[m_dataSize];
 		CopyMemory(m_packetData, spanData.data(), spanData.size());
 	}
 	~PacketData()
@@ -41,12 +41,12 @@ public:
 		return m_sessionIndex;
 	}
 
-	constexpr std::span<const char> GetSpanData() const
+	constexpr std::span<const byte> GetSpanData() const
 	{
-		return std::span<const char>(m_packetData, m_dataSize);
+		return std::span<const byte>(m_packetData, m_dataSize);
 	}
 private:
 	uint32 m_sessionIndex = 0;
 	uint32 m_dataSize = 0;
-	char* m_packetData = nullptr;
+	byte* m_packetData = nullptr;
 };
