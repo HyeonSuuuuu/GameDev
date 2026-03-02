@@ -137,10 +137,10 @@
     <ClCompile Include="Common.ixx" />
     <ClCompile Include="Define.ixx" />
     <ClCompile Include="EchoServer.ixx" />
-    <ClCompile Include="ErrorCode.cpp" />
     <ClCompile Include="ErrorCode.ixx" />
     <ClCompile Include="IOCPNetwork.ixx" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PacketManager.ixx" />
     <ClCompile Include="PacketData.ixx" />
     <ClCompile Include="Session.ixx" />
     <ClCompile Include="SessionManager.ixx" />
@@ -149,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Common\Log.h" />
+    <ClInclude Include="..\..\Common\Protocol.h" />
     <ClInclude Include="..\..\Common\Type.h" />
     <ClInclude Include="Macro.h" />
   </ItemGroup>

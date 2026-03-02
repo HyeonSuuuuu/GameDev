@@ -7,8 +7,8 @@
 
 namespace NetConfig
 {
-	constexpr uint16 GAME_SERVER_PORT = 3333;
-	constexpr uint16 AI_SERVER_PORT = 4444;
+	inline constexpr uint16 GAME_SERVER_PORT = 3333;
+	inline constexpr uint16 AI_SERVER_PORT = 4444;
 
 }
 
@@ -16,9 +16,9 @@ namespace NetConfig
 // Protocol
 struct Packet
 {
-	uint32 clientIndex;
+	uint32 sessionIndex;
 	uint16 packetId;
-	std::span<const char> dataSpan;
+	std::span<const byte> dataSpan;
 };
 
 enum class PACKET_ID : uint16
@@ -68,18 +68,18 @@ struct PacketHeader
 	uint8 type; // 압축여부, 암호화 여부 등 속성을 알아내는 값
 };
 
-constexpr uint32 PACKET_HEADER_SIZE = sizeof(PacketHeader);
+inline constexpr uint32 PACKET_HEADER_SIZE = sizeof(PacketHeader);
 
 
-constexpr int32 MAX_USER_ID_LEN = 32;
-constexpr int32 MAX_USER_PW_LEN = 32;
+inline constexpr int32 MAX_USER_ID_LEN = 32;
+inline constexpr int32 MAX_USER_PW_LEN = 32;
 // 로그인 요청
 struct CS_Login : public PacketHeader
 {
 	char userID[MAX_USER_ID_LEN + 1];
 	char userPW[MAX_USER_PW_LEN + 1];
 };
-constexpr uint32 CS_LOGIN_REQUEST_SIZE = sizeof(CS_Login);
+inline constexpr uint32 CS_LOGIN_REQUEST_SIZE = sizeof(CS_Login);
 // 로그인 응답
 struct SC_Login : public PacketHeader
 {
@@ -123,7 +123,7 @@ struct SC_RoomLeaveNotify : public PacketHeader
 };
 
 // 룸 채팅
-constexpr int32 MAX_CHAT_MSG_LEN = 256;
+inline constexpr int32 MAX_CHAT_MSG_LEN = 256;
 struct CS_RoomChat : public PacketHeader
 {
 	char chatMsg[MAX_CHAT_MSG_LEN + 1];

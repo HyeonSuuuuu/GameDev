@@ -42,14 +42,16 @@
     <ClCompile Include="ChatServer.ixx">
       <Filter>04_Chat</Filter>
     </ClCompile>
-    <ClCompile Include="ErrorCode.cpp">
-      <Filter>04_Chat</Filter>
-    </ClCompile>
     <ClCompile Include="User.ixx">
       <Filter>04_Chat</Filter>
     </ClCompile>
-    <ClCompile Include="ErrorCode.ixx" />
     <ClCompile Include="UserManager.ixx">
+      <Filter>04_Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="ErrorCode.ixx">
+      <Filter>04_Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketManager.ixx">
       <Filter>04_Chat</Filter>
     </ClCompile>
   </ItemGroup>
@@ -61,6 +63,9 @@
       <Filter>01_Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Common\Type.h">
+      <Filter>01_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Protocol.h">
       <Filter>01_Common</Filter>
     </ClInclude>
   </ItemGroup>

@@ -32,7 +32,7 @@ public:
 			return std::nullopt;
 		}
 
-		auto [closedTime, index] = m_queue.front();
+		auto [closedTime, index] = std::move(m_queue.front());
 		if (GetTick() - closedTime < REUSE_WAIT_MS)
 		{
 			return std::nullopt;
