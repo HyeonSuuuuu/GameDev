@@ -85,18 +85,3 @@ cmake --build build --config Release -j 12
 llama.h
 llama-cpp.h
 ---
-
-
-
-
-## 🚀 5. 실행 테스트
-
-모델 파일(.gguf)을 준비한 후 아래 명령어로 서버 구동을 확인합니다.
-
-\# 1. CLI 기본 추론 테스트
-./llama-cli -m models/your-model.gguf -p "Hello, AI Server!"
-
-\# 2. 게임 서버 연동을 위한 API 서버 모드 실행
-./llama-server -m models/your-model.gguf --port 8080
-
----
