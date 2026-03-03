@@ -1,51 +1,102 @@
 https://grandiose-delphinium-56f.notion.site/2649f08c004a81e49fa9f14f5815fdd5?source=copy_link
 
+\# 🤖 AI Game Server Setup Guide (llama.cpp)
 
-## 컨벤션
+이 가이드는 게임 서버 졸업 작품에서 LLM 추론 기능을 통합하기 위해 llama.cpp를 빌드하고 환경을 설정하는 전체 과정을 다룹니다.
 
-- 스크립트
-    - c++ type 컨벤션(int32, int64)
-    - 함수명 : 파스칼 표기법
-    - 멤버 변수 : _변수명 (카멜) or m_ 카멜
-    - 파일 및 폴더명 : 파스칼 표기법
-    - 클래스명 : 파스칼 표기법
-    - 함수 내 변수명 : 카멜 표기법
-    - using namespace; X (std도 신중히)
-- 커밋
-    - Feat: 새로운 기능 추가
-    - Fix: 버그 수정
-    - Docs: 문서 수정
-    - Style: 코드 포맷팅, 스타일 변경
-    - Refactor: 코드 리팩터링
-    - Test: 테스트 추가/수정
-    - Chore: 빌드 업무, 기타 수정 (코드 기능이나 버그 수정과는 관련 없는 유지보수 작업)
+---
+
+## ⚡ Quick Start
+
+### 1. 필수 종속성 다운로드 (Prerequisites)
+프로젝트 구동 및 하드웨어 가속을 위해 아래 SDK들을 반드시 먼저 설치해야 합니다.
+
+\* **NVIDIA CUDA Toolkit**: NVIDIA GPU 가속을 위해 필수입니다.
+  * \[다운로드 링크\](https://developer.nvidia.com/cuda-downloads)
+\* **Vulkan SDK**: 다양한 하드웨어 환경(AMD, Intel 등)에서의 가속을 지원합니다.
+  * \[다운로드 링크\](https://vulkan.lunarg.com/sdk/home)
+\* **Visual Studio 2022**: 빌드 시스템 생성 및 C++ 컴파일을 위해 필요합니다.
+  * \[다운로드 링크\](https://visualstudio.microsoft.com/ko/vs/)
+  * \*본 프로젝트는 Visual Studio 2022에 내장된 CMake를 사용하여 빌드되었습니다.\*
+
+### 2. 소스 코드 및 바이너리 준비
+공식 레포지토리에서 최신 소스를 가져오거나 빌드된 파일을 준비합니다.
+
+\* **llama.cpp Releases**: \[GitHub Releases\](https://github.com/ggml-org/llama.cpp/releases)에서 최신 버전의 Source code (.zip)를 다운로드합니다.
+\* 압축을 푼 폴더로 터미널(또는 Developer Command Prompt)을 이동시킵니다.
+
+---
+
+## 🛠️ 3. CMake 빌드 및 세팅 (Build from Source)
+
+Visual Studio로 빌드하는 경우 반드시 **Developer Command Prompt for VS 2022**를 실행하여 경로 인식을 정상적으로 처리해야 합니다.
+
+### Step 1: 빌드 폴더 생성
+mkdir build
+cd build
+
+### Step 2: 환경별 빌드 옵션 선택
+사용하려는 가속기에 맞춰 CMake 설정을 진행합니다.
+
+\* **CUDA (NVIDIA GPU 전용)**
+  cmake .. -DGGML_CUDA=ON
+
+\* **Vulkan (범용 GPU 가속)**
+  cmake .. -DGGML_VULKAN=ON
+
+\* **공통 설정 (추천)**
+  시스템 환경을 판단하여 알맞은 가속기로 자동 설정해 줍니다.
+  cmake .. -B build -G "Visual Studio 17 2022" -DGGML_BACKEND_DL=ON -DGGML_CUDA=ON -DGGML_VULKAN=ON -DGGML_NATIVE=OFF
+
+### Step 3: 프로젝트 빌드
+본인의 CPU 스레드 수에 맞춰 -j 옵션을 조정하세요. (예: 12스레드 사용 시 -j 12)
+
+\# Debug 빌드
+cmake --build build --config Debug -j 12
+
+\# Release 빌드
+cmake --build build --config Release -j 12
+
+---
+
+## 📦 4. DLL 파일 배치
+
+빌드가 완료되면 build/bin/Release 또는 build/bin/Debug 폴더 내에 생성된 다음 파일들을 **게임 서버 실행 파일(.exe)** 경로로 복사합니다.
+
+\*\*복사 필수 DLL 목록:\*\*
+\* llama.dll
+\* ggml.dll
+\* ggml-base.dll
+\* ggml-cpu.dll
+\* ggml-cuda.dll
+\* ggml-vulkan.dll
+
+또한 build/src/Release(or Debug) 또는 build/ggml/src/Release(or Debug) 폴더 내에 생성된 다음 파일들을 **게임 서버 실행 파일(.exe)** 경로로 복사합니다
+
+**복사 필수 lib 목록:**
+* llama.lib
+* ggml.lib
+* ggml-base.lib
+* ggml-cpu.lib
+
+또한 include 폴더 내에 있는 파일들을 소스 코드 경로로 복사합니다.
+
+**복사 필수 헤더 목록:**
+llama.h
+llama-cpp.h
+---
 
 
-```markdown
-# C++ Core Guidelines Code Review Checklist
 
-## Resource Management (R)
-- [ ] 모든 new는 make_unique/make_shared로 교체 가능한가?
-- [ ] 모든 raw pointers가 명확한 소유권을 가지는가?
-- [ ] 모든 자원이 RAII로 관리되는가?
 
-## Functions (F)
-- [ ] 함수 매개변수의 소유권이 명확한가?
-- [ ] 큰 객체를 const 참조로 전달하는가?
-- [ ] 함수가 수정하지 않는 인자에 const를 사용하는가?
+## 🚀 5. 실행 테스트
 
-## Type System (T)
-- [ ] auto로 타입을 충분히 활용하는가?
-- [ ] 타입 변환이 명시적인가?
-- [ ] 강타입(strong types)을 정의할 기회가 있는가?
+모델 파일(.gguf)을 준비한 후 아래 명령어로 서버 구동을 확인합니다.
 
-## Error Handling (E)
-- [ ] 오류 조건을 예외로 표현하는가?
-- [ ] RAII와 예외가 조화롭게 작동하는가?
-- [ ] 예외 안전성 보장(basic, strong, nothrow)이 있는가?
+\# 1. CLI 기본 추론 테스트
+./llama-cli -m models/your-model.gguf -p "Hello, AI Server!"
 
-## Concurrency (CP)
-- [ ] 모든 데이터 경쟁이 제거되었는가?
-- [ ] std::thread가 RAII로 관리되는가?
-- [ ] 데드락 위험이 없는가?
-```
+\# 2. 게임 서버 연동을 위한 API 서버 모드 실행
+./llama-server -m models/your-model.gguf --port 8080
+
+---
