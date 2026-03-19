@@ -7,19 +7,13 @@
 
 namespace NetConfig
 {
-	inline constexpr uint16 GAME_SERVER_PORT = 3333;
+	inline constexpr uint16 GAME_SERVER_PORT = 11021;
 	inline constexpr uint16 AI_SERVER_PORT = 4444;
-
 }
 
 
 // Protocol
-struct Packet
-{
-	uint32 sessionIndex;
-	uint16 packetId;
-	std::span<const byte> dataSpan;
-};
+
 
 enum class PACKET_ID : uint16
 {
@@ -79,7 +73,7 @@ struct CS_Login : public PacketHeader
 	char userID[MAX_USER_ID_LEN + 1];
 	char userPW[MAX_USER_PW_LEN + 1];
 };
-inline constexpr uint32 CS_LOGIN_REQUEST_SIZE = sizeof(CS_Login);
+inline constexpr uint32 CS_LOGIN_PACKET_SIZE = sizeof(CS_Login);
 // 로그인 응답
 struct SC_Login : public PacketHeader
 {

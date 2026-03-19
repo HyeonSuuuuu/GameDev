@@ -133,13 +133,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ChatMain.cpp" />
     <ClCompile Include="ChatServer.ixx" />
     <ClCompile Include="Common.ixx" />
     <ClCompile Include="Define.ixx" />
     <ClCompile Include="EchoServer.ixx" />
     <ClCompile Include="ErrorCode.ixx" />
     <ClCompile Include="IOCPNetwork.ixx" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="EchoMain.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="PacketManager.ixx" />
     <ClCompile Include="PacketData.ixx" />
     <ClCompile Include="Session.ixx" />

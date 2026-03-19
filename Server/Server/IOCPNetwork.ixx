@@ -22,8 +22,6 @@ public:
 		
 	bool InitEnvironment()
 	{
-		// 간혹 서버 주고받는 데이터가 utf-8이 아니라 cp-949임. 윈10 구버전에서 그러는거 같음
-		std::locale::global(std::locale("ko_KR.UTF-8"));
 		return true;
 	}
 	bool InitSocket()
@@ -192,7 +190,7 @@ private:
 
 			if (IOOperation::ACCEPT == pOverlappedEx->m_operation)
 			{
-				pSession = m_sessionManager->GetSession(pOverlappedEx->m_sessionIdex);
+				pSession = m_sessionManager->GetSession(pOverlappedEx->m_sessionIndex);
 				if (pSession)
 				{
 					pSession->AcceptCompleted(m_iocpHandle);

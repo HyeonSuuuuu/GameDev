@@ -93,7 +93,7 @@ public:
 		//m_acceptOverlappedEx.m_wsaBuf.len = 0;
 		//m_acceptOverlappedEx.m_wsaBuf.buf = nullptr;
 		m_acceptOverlappedEx.m_operation = IOOperation::ACCEPT;
-		m_acceptOverlappedEx.m_sessionIdex = m_index;
+		m_acceptOverlappedEx.m_sessionIndex = m_index;
 		
 		if (AcceptEx(listenSock, m_socket, m_acceptBuf, 0, sizeof(SOCKADDR_IN) + 16,
 			sizeof(SOCKADDR_IN) + 16, &bytes, reinterpret_cast<LPWSAOVERLAPPED>(&m_acceptOverlappedEx)) == false)

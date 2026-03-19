@@ -1,5 +1,8 @@
+export module ChatServer;
+
 import IOCPNetwork;
 import Common;
+import Define;
 import PacketManager;
 import "../../Common/Protocol.h";
 
@@ -23,17 +26,22 @@ public:
 		std::print("[Onconnect]: Index({})\n", clientIndex);
 		
 		Packet packet{ clientIndex, (uint16)PACKET_ID::SYS_USER_CONNECT, {} };
-		
+		m_packetManager->EnqueSystemPacket(packet);
 	}
 
 	virtual void OnClose(const uint32 clientIndex) override
 	{
 		std::print("[OnClose]: Index({})\n", clientIndex);
+		
+		Packet packet{ clientIndex, (uint16)PACKET_ID::SYS_USER_DISCONNECT, {} };
+		m_packetManager->EnqueSystemPacket(packet);
 	}
 
 	virtual void OnRecv(const uint32 clientIndex, const std::span<const byte> recvData) override
 	{
 		//std::print("[OnRecv]: Index({}), dataSize({})\n", clientIndex, recvData.size());
+	
+		m_packetManager->ReceivePacket(clientIndex, recvData);
 	}
 
 	void Run(const uint32 maxClient)
@@ -42,11 +50,17 @@ public:
 			{
 				SendMsg(clientIndex, dataSpan);
 			};
+
+		m_packetManager = std::make_unique<PacketManager>(maxClient);
+		m_packetManager->m_sendFunc = sendPacketFunc;
+		m_packetManager->Run();
+
 		StartServer(maxClient);
 	}
 
 	void End()
 	{
+		m_packetManager->End();
 
 		DestroyThread();
 	}

@@ -22,6 +22,13 @@ export
 		SOCKET m_socketClient;
 		WSABUF m_wsaBuf;
 		IOOperation m_operation;
-		uint32 m_sessionIdex = 0;
+		uint32 m_sessionIndex = 0;
+	};
+
+	struct Packet
+	{
+		uint32 sessionIndex;
+		uint16 packetId;
+		std::span<const byte> dataSpan;
 	};
 }

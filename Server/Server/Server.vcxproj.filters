@@ -24,9 +24,6 @@
     <ClCompile Include="EchoServer.ixx">
       <Filter>03_Echo</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>03_Echo</Filter>
-    </ClCompile>
     <ClCompile Include="Define.ixx">
       <Filter>02_Network</Filter>
     </ClCompile>
@@ -52,6 +49,12 @@
       <Filter>04_Chat</Filter>
     </ClCompile>
     <ClCompile Include="PacketManager.ixx">
+      <Filter>04_Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="EchoMain.cpp">
+      <Filter>03_Echo</Filter>
+    </ClCompile>
+    <ClCompile Include="ChatMain.cpp">
       <Filter>04_Chat</Filter>
     </ClCompile>
   </ItemGroup>

@@ -3,6 +3,7 @@ export module PacketManager;
 import Common;
 import "../../Common/Protocol.h";
 import UserManager;
+import Define;
 
 export class PacketManager
 {
@@ -14,12 +15,13 @@ public:
 	{
 		Register(PACKET_ID::SYS_USER_CONNECT, &PacketManager::ProcessUserConnect);
 		Register(PACKET_ID::SYS_USER_DISCONNECT, &PacketManager::ProcessUserDisConnect);
-
+		Register(PACKET_ID::CS_LOGIN_REQUEST, &PacketManager::ProcessLogin);
 		CreateComponent(maxClient);
 	}
 
 	bool Run()
 	{
+		Log::Success("패킷 처리 스레드 생성 성공");
 		m_isRunProcessThread = true;
 		m_processThread = std::thread([this]() { ProcessPacket(); });
 		return true;
@@ -34,7 +36,7 @@ public:
 		}
 	}
 
-	void ReceivePacket(const uint32 sessionIndex, std::span<byte> dataSpan)
+	void ReceivePacket(const uint32 sessionIndex, const std::span<const byte> dataSpan)
 	{
 		auto pUser = m_userManager->GetUser(sessionIndex);
 		pUser->SetPacket(dataSpan);
@@ -71,14 +73,6 @@ public:
 			
 		}
 	}
-
-private:
-
-	void CreateComponent(const uint32 maxClient)
-	{
-		m_userManager = std::make_unique<UserManager>(maxClient);
-	}
-
 	void EnqueLogicPacket(const uint32 sessionIndex)
 	{
 		std::lock_guard<std::mutex> guard(m_lock);
@@ -127,6 +121,14 @@ private:
 		return packet;
 	}
 
+	std::function<void(uint32 clientIndex, std::span<const byte> dataSpan)> m_sendFunc;
+private:
+
+	void CreateComponent(const uint32 maxClient)
+	{
+		m_userManager = std::make_unique<UserManager>(maxClient);
+	}
+
 	void ProcessRecvPacket(const uint32 sessionIndex, const uint16 packetId, std::span<const byte> packet)
 	{
 		if (auto it = m_recvFuncDict.find(packetId); it != m_recvFuncDict.end())
@@ -146,6 +148,8 @@ private:
 		};
 	}
 
+	// --------------------------------- Packet Func -------------------------------------------------------------------
+
 	void ProcessUserConnect(uint32 sessionIndex, std::span<const byte> dataSpan)
 	{
 		Log::Info("[ProcessUserConnect] sessionIndex: {}", sessionIndex);
@@ -158,10 +162,26 @@ private:
 		Log::Info("[ProcessUserDisConnect] sessionIndex: {}", sessionIndex);
 		m_userManager->RemoveUser(sessionIndex);
 	}
+	
+	void ProcessLogin(uint32 sessionIndex, std::span<const byte> dataSpan)
+	{
+		if (CS_LOGIN_PACKET_SIZE != dataSpan.size())
+			return;
+
+		const CS_Login* loginReqPacket = reinterpret_cast<const CS_Login*>(dataSpan.data());
+		Log::Info("id: {} pw: {}", loginReqPacket->userID, loginReqPacket->userPW);
+
+		SC_Login loginResPacket;
+		
+		
+		
+		// 이름 중복 검사
+		
+		Log::Info("로그인 요청");
+	}
 
 	std::function<void(uint32, std::span<const byte>)> m_recvFunc;
 	std::unordered_map<uint16, std::function<void(uint32, std::span<const byte>)>> m_recvFuncDict;
-	std::function<void(uint16, byte*)> m_sendFunc;
 
 	std::unique_ptr<UserManager> m_userManager;
 	

@@ -1,5 +1,6 @@
 export module User;
 import Common;
+import Define;
 import "../../Common/Protocol.h";
 import <windows.h>;
 
@@ -87,7 +88,7 @@ public:
 		return m_domainState;
 	}
 
-	void SetPacket(const std::span<byte> dataSpan)
+	void SetPacket(const std::span<const byte> dataSpan)
 	{
 		if (dataSpan.size() + m_packetDataWritePos > PACKET_DATA_BUFFER_SIZE)
 		{
