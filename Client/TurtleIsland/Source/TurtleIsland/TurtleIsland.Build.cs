@@ -18,7 +18,9 @@ public class TurtleIsland : ModuleRules
 			"StateTreeModule",
 			"GameplayStateTreeModule",
 			"UMG",
-			"Slate"
+			"Slate",
+			"Sockets",
+			"Networking"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
@@ -37,7 +39,8 @@ public class TurtleIsland : ModuleRules
 			"TurtleIsland/Variant_SideScrolling/AI",
 			"TurtleIsland/Variant_SideScrolling/Gameplay",
 			"TurtleIsland/Variant_SideScrolling/Interfaces",
-			"TurtleIsland/Variant_SideScrolling/UI"
+			"TurtleIsland/Variant_SideScrolling/UI",
+			"../../../Common"
 		});
 
 		// Uncomment if you are using Slate UI
