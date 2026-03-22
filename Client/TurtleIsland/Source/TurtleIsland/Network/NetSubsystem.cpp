@@ -35,3 +35,11 @@ void UNetSubsystem::Deinitialize()
 	}
 	Super::Deinitialize();
 }
+
+void UNetSubsystem::TryLogin(FString UserID, FString UserPW)
+{
+	if (Networker)
+	{
+		Networker->SendLoginPacket(UserID, UserPW);
+	}
+}

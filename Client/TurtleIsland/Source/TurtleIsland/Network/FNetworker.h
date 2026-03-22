@@ -13,6 +13,8 @@ public:
 	virtual void Exit() override;
 	virtual void Stop() override;
 	
+	void SendLoginPacket(const FString& userID, const FString& userPW);
+	
 private:
 	FSocket* Socket = nullptr;
 	bool IsRunning = false;

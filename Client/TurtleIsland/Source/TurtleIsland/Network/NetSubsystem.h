@@ -22,6 +22,9 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	
+	UFUNCTION(BlueprintCallable, Category = "Network")
+	void TryLogin(FString UserID, FString UserPW);
+	
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Network")
 	bool IsConnect = false;

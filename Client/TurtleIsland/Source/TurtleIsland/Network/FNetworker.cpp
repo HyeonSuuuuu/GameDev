@@ -81,3 +81,12 @@ void FNetworker::Stop()
 	IsRunning = false;
 	FRunnable::Stop();
 }
+
+void FNetworker::SendLoginPacket(const FString& userID, const FString& userPW)
+{
+	CS_Login LoginPacket {};
+	LoginPacket.id = static_cast<uint16>(PACKET_ID::CS_LOGIN_REQUEST);
+	LoginPacket.size = sizeof(CS_LOGIN_PACKET_SIZE);
+	
+	// Fstring -> char 변환
+}
