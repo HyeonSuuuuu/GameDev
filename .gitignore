@@ -477,3 +477,7 @@ DerivedDataCache/
 Intermediate/
 Saved/
 LocalBuilds/
+*.sln
+.vscode/
+.idea/
+.vsconfig
