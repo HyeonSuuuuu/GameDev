@@ -82,7 +82,7 @@ public:
 		m_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);
 		if (m_socket == INVALID_SOCKET)
 		{
-			Log::Error("client WSASocket() 실패 : {}", GetLastError());
+			Log::ErrorDisplay("client WSASocket() 실패", GetLastError());
 			return false;
 		}
 		DWORD bytes = 0;
@@ -100,7 +100,7 @@ public:
 		{
 			if (WSAGetLastError() != WSA_IO_PENDING)
 			{
-				Log::Error("AcceptEx Error : {}", WSAGetLastError());
+				Log::ErrorDisplay("AcceptEx Error", WSAGetLastError());
 				return false;
 			}
 		}
@@ -147,7 +147,7 @@ public:
 
 		if (ret == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
 		{
-			Log::Error("WSARecv() 실패 : {}", WSAGetLastError());
+			Log::ErrorDisplay("WSARecv() 실패", WSAGetLastError());
 			return false;
 		}
 
@@ -196,7 +196,7 @@ public:
 		// 연결 실패 처리 (클라이언트 끊김)
 		if (ret == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
 		{
-			Log::Error("WSASend() 실패 : {}", WSAGetLastError());
+			Log::ErrorDisplay("WSASend() 실패", WSAGetLastError());
 			return false;
 		}
 		m_sendDataQueue.pop_front();
@@ -225,7 +225,7 @@ public:
 
 		if (hIOCP == nullptr || iocpHandle != hIOCP)
 		{
-			Log::Error("CreateCompletionPort() 실패: {}", GetLastError());
+			Log::ErrorDisplay("CreateCompletionPort() 실패", GetLastError());
 			return false;
 		}
 

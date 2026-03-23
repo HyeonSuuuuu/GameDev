@@ -31,14 +31,21 @@ public:
 		int32 ret = WSAStartup(MAKEWORD(2, 2), &wsaData);
 		if (ret != 0)
 		{
-			Log::Error("WSAStartup() 실패 : {}", WSAGetLastError());
+			Log::ErrorDisplay("WSAStartup() 실패", WSAGetLastError());
 			return false;
 		}
+
+		if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2)
+		{
+			Log::ErrorDisplay("Winsock.dll의 사용 가능한 버전을 찾을 수 없습니다", WSAGetLastError());
+			return 1;
+		}
+
 
 		m_listenSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);
 		if (m_listenSocket == INVALID_SOCKET)
 		{
-			Log::Error("socket() 실패 : {}", WSAGetLastError());
+			Log::ErrorDisplay("socket() 실패", WSAGetLastError());
 		}
 
 		Log::Success("소켓 초기화 성공");
@@ -54,14 +61,14 @@ public:
 		int32 ret = bind(m_listenSocket, (SOCKADDR*)&serverAddr, sizeof(SOCKADDR_IN));
 		if (ret != 0)
 		{
-			Log::Error("bind() 실패 : {}", WSAGetLastError());
+			Log::ErrorDisplay("bind() 실패", WSAGetLastError());
 			return false;
 		}
 
 		ret = listen(m_listenSocket, SOMAXCONN);
 		if (ret != 0)
 		{
-			Log::Error("listen() 실패 : {}", WSAGetLastError());
+			Log::ErrorDisplay("listen() 실패", WSAGetLastError());
 			return false;
 		}
 
@@ -75,14 +82,14 @@ public:
 		m_iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, MAX_WORKERTHREAD);
 		if (m_iocpHandle == nullptr)
 		{
-			Log::Error("CreateIoCompletionPort() 실패: {}", GetLastError());
+			Log::ErrorDisplay("CreateIoCompletionPort() 실패", GetLastError());
 			return false;
 		}
 
 		HANDLE hIOCP = CreateIoCompletionPort((HANDLE)m_listenSocket, m_iocpHandle, (ULONG_PTR)0, 0);
 		if (hIOCP == nullptr || hIOCP != m_iocpHandle)
 		{
-			Log::Error("ListenSocket IOCP 등록 실패 : {}", GetLastError());
+			Log::ErrorDisplay("ListenSocket IOCP 등록 실패", GetLastError());
 			return false;
 		}
 
@@ -182,7 +189,7 @@ private:
 
 			if (lpOverlapped == nullptr)
 			{
-				Log::Error("GetQueuedCompletionStatus() 실패: {}", GetLastError());
+				Log::ErrorDisplay("GetQueuedCompletionStatus() 실패", GetLastError());
 				continue;
 			}
 

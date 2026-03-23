@@ -1,8 +1,10 @@
 #pragma once
 #include <print>
 #include <chrono>
-#include "Type.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
+#include "Type.h"
 namespace Log
 {
 	enum class Level : uint8
@@ -56,5 +58,20 @@ namespace Log
 	template<typename... Args>
 		void Error(std::format_string<Args...> fmt, Args&&... args) {
 		Write(Level::Error, fmt, std::forward<Args>(args)...);
+	}
+	void ErrorDisplay(const char* msg, int errNo) {
+		char* msgBuf = nullptr;
+		FormatMessageA(
+			FORMAT_MESSAGE_ALLOCATE_BUFFER |
+			FORMAT_MESSAGE_FROM_SYSTEM,
+			NULL,
+			errNo,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPSTR)&msgBuf, 0, NULL);
+		std::println("Error: {}", msg);
+		std::println("시스템({}): {}",errNo, msgBuf);
+		LocalFree(msgBuf);
+
+		while (true);
 	}
 }
