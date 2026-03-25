@@ -49,7 +49,7 @@ enum class PACKET_ID : uint16
 	SC_ROOM_ENTER_RESPONSE = 321,
 	SC_ROOM_ENTER_NOTIFY = 322,
 
-	SC_ROOM_LEAVE_RESPONSE = 331,
+	SC_ROOM_LEAVE_NOTIFY = 331,
 
 	SC_ROOM_CHAT_RESPONSE = 341,
 	SC_ROOM_CHAT_NOTIFY = 342,
@@ -161,12 +161,6 @@ struct CS_RoomLeave : public PacketHeader
 {
 };
 inline constexpr uint16 CS_ROOM_LEAVE_PACKET_SIZE = sizeof(CS_RoomLeave);
-
-struct SC_RoomLeave : public PacketHeader
-{
-	uint8 result;
-};
-inline constexpr uint16 SC_ROOM_LEAVE_PACKET_SIZE = sizeof(SC_RoomLeave);
 
 struct SC_RoomLeaveNotify : public PacketHeader
 {
