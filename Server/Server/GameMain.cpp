@@ -1,4 +1,4 @@
-import ChatServer;
+import GameServer;
 import Common;
 import "../../Common/Protocol.h";
 
@@ -8,7 +8,7 @@ constexpr uint16 MAX_CLIENT = 10000;
 
 int main()
 {
-	ChatServer server;
+	GameServer server;
 
 	server.InitEnvironment();
 	server.InitSocket();

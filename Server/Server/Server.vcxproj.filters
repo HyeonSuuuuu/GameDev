@@ -10,7 +10,7 @@
     <Filter Include="03_Echo">
       <UniqueIdentifier>{e6b54be2-3e61-4570-8fc1-44c86241aea2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="04_Chat">
+    <Filter Include="04_Application">
       <UniqueIdentifier>{56ea910b-41de-40f2-982b-b3f24f85a09a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -36,26 +36,26 @@
     <ClCompile Include="PacketData.ixx">
       <Filter>03_Echo</Filter>
     </ClCompile>
-    <ClCompile Include="ChatServer.ixx">
-      <Filter>04_Chat</Filter>
+    <ClCompile Include="GameServer.ixx">
+      <Filter>04_Application</Filter>
     </ClCompile>
     <ClCompile Include="User.ixx">
-      <Filter>04_Chat</Filter>
+      <Filter>04_Application</Filter>
     </ClCompile>
     <ClCompile Include="UserManager.ixx">
-      <Filter>04_Chat</Filter>
+      <Filter>04_Application</Filter>
     </ClCompile>
     <ClCompile Include="ErrorCode.ixx">
-      <Filter>04_Chat</Filter>
+      <Filter>04_Application</Filter>
     </ClCompile>
     <ClCompile Include="PacketManager.ixx">
-      <Filter>04_Chat</Filter>
+      <Filter>04_Application</Filter>
     </ClCompile>
     <ClCompile Include="EchoMain.cpp">
       <Filter>03_Echo</Filter>
     </ClCompile>
-    <ClCompile Include="ChatMain.cpp">
-      <Filter>04_Chat</Filter>
+    <ClCompile Include="GameMain.cpp">
+      <Filter>04_Application</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

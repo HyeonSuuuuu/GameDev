@@ -133,8 +133,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ChatMain.cpp" />
-    <ClCompile Include="ChatServer.ixx" />
+    <ClCompile Include="GameMain.cpp" />
+    <ClCompile Include="GameServer.ixx" />
     <ClCompile Include="Common.ixx" />
     <ClCompile Include="Define.ixx" />
     <ClCompile Include="EchoServer.ixx" />

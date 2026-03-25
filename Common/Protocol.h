@@ -27,24 +27,36 @@ enum class PACKET_ID : uint16
 
 	// Client To Server (200~299)
 	CS_LOGIN_REQUEST = 201,
-	CS_ROOM_ENTER_REQUEST = 211,
-	CS_ROOM_LEAVE_REQUEST = 221,
-	CS_ROOM_CHAT_REQUEST = 231,
-	CS_MOVE = 241,
+
+	CS_LOBBY_ENTER_REQUEST = 211,
+
+	CS_ROOM_ENTER_REQUEST = 221,
+
+	CS_ROOM_LEAVE_REQUEST = 231,
+
+	CS_ROOM_CHAT_REQUEST = 241,
+
+	CS_ROOM_START_REQUEST = 252,
+
+	CS_MOVE = 261,
 
 	// Server To Client (300 ~ 399)
 	SC_LOGIN_RESPONSE = 301,
 
-	SC_ROOM_ENTER_RESPONSE = 311,
-	SC_ROOM_ENTER_NOTIFY = 312,
+	SC_LOBBY_RESPONSE = 311,
+
+	SC_ROOM_ENTER_RESPONSE = 321,
+	SC_ROOM_ENTER_NOTIFY = 322,
 
 
-	SC_ROOM_LEAVE_RESPONSE = 321,
+	SC_ROOM_LEAVE_RESPONSE = 331,
 
-	SC_ROOM_CHAT_RESPONSE = 331,
-	SC_ROOM_CHAT_NOTIFY = 332,
+	SC_ROOM_CHAT_RESPONSE = 341,
+	SC_ROOM_CHAT_NOTIFY = 342,
 
-	SC_MOVE_NOTIFY = 341,
+	SC_ROOM_START_NOTIFY = 351,
+
+	SC_MOVE_NOTIFY = 361,
 
 	// AI To Server (3000 ~ 3099)
 	AS_AI = 3001,
@@ -78,6 +90,17 @@ inline constexpr uint32 CS_LOGIN_PACKET_SIZE = sizeof(CS_Login);
 struct SC_Login : public PacketHeader
 {
 	uint8 result;
+};
+
+struct CS_LobbyEnter : public PacketHeader
+{
+
+};
+
+struct SC_LobbyEnter : public PacketHeader
+{
+	// 방 목록
+	// 방제목
 };
 
 // 룸 입장 요청
@@ -132,6 +155,14 @@ struct SC_RoomChatNotify : public PacketHeader
 {
 	uint32 userIndex;
 	char chatMsg[MAX_CHAT_MSG_LEN + 1];
+};
+
+struct CS_RoomStart : public PacketHeader
+{	
+};
+
+struct SC_RoomStart : public PacketHeader
+{
 };
 
 struct CS_Move : public PacketHeader

@@ -1,4 +1,4 @@
-export module ChatServer;
+export module GameServer;
 
 import IOCPNetwork;
 import Common;
@@ -8,11 +8,11 @@ import "../../Common/Protocol.h";
 
 
 
-export class ChatServer : public IOCPNetwork
+export class GameServer : public IOCPNetwork
 {
 public:
-	ChatServer() = default;
-	virtual ~ChatServer() = default;
+	GameServer() = default;
+	virtual ~GameServer() = default;
 
 	virtual void OnConnect(const uint32 clientIndex) override
 	{
