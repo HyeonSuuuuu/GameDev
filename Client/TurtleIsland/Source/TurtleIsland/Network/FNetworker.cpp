@@ -41,8 +41,8 @@ uint32 FNetworker::Run()
 	CS_Login loginPacket {};
 	loginPacket.id = static_cast<uint16>(PACKET_ID::CS_LOGIN_REQUEST);
 	loginPacket.size = CS_LOGIN_PACKET_SIZE;
-	const char* ID = "hyeonsu1234";
-	const char* PW = "hyeonsu8900";
+	const FString* ID = "hyeonsu1234";
+	const FString* PW = "hyeonsu8900";
 	FMemory::Memcpy(loginPacket.userID, ID, MAX_USER_ID_LEN);
 	FMemory::Memcpy(loginPacket.userPW, PW, MAX_USER_PW_LEN);
 	
@@ -88,5 +88,9 @@ void FNetworker::SendLoginPacket(const FString& userID, const FString& userPW)
 	LoginPacket.id = static_cast<uint16>(PACKET_ID::CS_LOGIN_REQUEST);
 	LoginPacket.size = sizeof(CS_LOGIN_PACKET_SIZE);
 	
+
 	// Fstring -> char 변환
 }
+
+//언리얼에서 값 가져와서 형변환해서 패킷에 넣기, 그 패킷을 큐에 넣음: 레벨마다 패킷의 크기가 다르니까 가변으로 push해서 Run에서 그 패킷을 pop한다.
+

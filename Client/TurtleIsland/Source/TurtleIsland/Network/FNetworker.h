@@ -18,5 +18,4 @@ public:
 private:
 	FSocket* Socket = nullptr;
 	bool IsRunning = false;
-	
 };
