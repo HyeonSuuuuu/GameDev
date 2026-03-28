@@ -93,4 +93,3 @@ void FNetworker::SendLoginPacket(const FString& userID, const FString& userPW)
 }
 
 //언리얼에서 값 가져와서 형변환해서 패킷에 넣기, 그 패킷을 큐에 넣음: 레벨마다 패킷의 크기가 다르니까 가변으로 push해서 Run에서 그 패킷을 pop한다.
-

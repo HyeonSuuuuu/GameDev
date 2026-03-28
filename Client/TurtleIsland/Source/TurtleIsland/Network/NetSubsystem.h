@@ -14,7 +14,7 @@ class FNetworker;
 UCLASS()
 class TURTLEISLAND_API UNetSubsystem : public UGameInstanceSubsystem
 {
-	GENERATED_BODY()
+	GENERATED_BODY();
 public:
 	UNetSubsystem() = default;
 	virtual ~UNetSubsystem() = default;
@@ -22,11 +22,11 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	
-	UFUNCTION(BlueprintCallable, Category = "Network")
+	UFUNCTION(BlueprintCallable, Category = "Network");
 	void TryLogin(FString UserID, FString UserPW);
 	
 protected:
-	UPROPERTY(BlueprintReadOnly, Category = "Network")
+	UPROPERTY(BlueprintReadOnly, Category = "Network");
 	bool IsConnect = false;
 	
 	FNetworker* Networker = nullptr;
