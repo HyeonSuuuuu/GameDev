@@ -20,8 +20,8 @@ void ULoginWidget::NativeConstruct()
 void ULoginWidget::OnLoginButtonClicked()
 {
 	// 입력된 텍스트 가져오기
-	FString ID = UserIDInput->GetText().ToString();
-	FString PW = UserPWInput->GetText().ToString();
+	FString ID = UserIDInput ? UserIDInput->GetText().ToString() : TEXT("");
+	FString PW = UserPWInput ? UserPWInput->GetText().ToString() : TEXT("");
 
 	// 유효성 검사: 비어있거나 공백만 있는지 확인
 	if (ID.TrimStartAndEnd().IsEmpty() || PW.TrimStartAndEnd().IsEmpty())
