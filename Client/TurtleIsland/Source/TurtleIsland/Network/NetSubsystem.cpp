@@ -62,6 +62,7 @@ void UNetSubsystem::Tick(float DeltaTime)
 					// 로그인 성공
 					UE_LOG(LogTemp, Log, TEXT("로그인 성공"));
 					UGameplayStatics::OpenLevel(GetWorld(), FName("Lv1_Lobby"));
+
 					break;
 				}
 			}

@@ -66,16 +66,53 @@ uint32 FNetworker::Run()
 		while (true)
 		{
 			TArray<uint8> SendPacket = DequeSendPacket();
-			if (SendPacket.Num() == 0)
-			{
-				break;
-			}
+			if (SendPacket.Num() == 0) break;
 			if (Socket)
 			{
 				int32 BytesSent = 0;
 				Socket->Send(SendPacket.GetData(), SendPacket.Num(), BytesSent);
 			}
 		}
+		
+		if (Socket)
+		{
+			uint32 PendingDataSize = 0;
+			if (Socket->HasPendingData(PendingDataSize) && PendingDataSize >= sizeof(PacketHeader))
+			{
+				// 1. 헤더 먼저 읽기
+				TArray<uint8> HeaderBuffer;
+				HeaderBuffer.SetNumUninitialized(sizeof(PacketHeader));
+				int32 BytesRead = 0;
+                
+				if (Socket->Recv(HeaderBuffer.GetData(), HeaderBuffer.Num(), BytesRead))
+				{
+					PacketHeader* Header = reinterpret_cast<PacketHeader*>(HeaderBuffer.GetData());
+					uint16 FullSize = Header->size;
+
+					// 2. 헤더에 적힌 전체 크기만큼 버퍼 준비
+					TArray<uint8> FullPacket;
+					FullPacket.SetNumUninitialized(FullSize);
+                    
+					// 이미 읽은 헤더 부분 복사
+					FMemory::Memcpy(FullPacket.GetData(), HeaderBuffer.GetData(), sizeof(PacketHeader));
+
+					// 3. 남은 바디 데이터 읽기
+					int32 BodySize = FullSize - sizeof(PacketHeader);
+					int32 BodyBytesRead = 0;
+                    
+					if (BodySize > 0)
+					{
+						// 실제 데이터가 다 올 때까지 잠시 기다리거나 루프를 돌 수 있지만, 
+						// 간단하게 Recv로 남은 부분 보충
+						Socket->Recv(FullPacket.GetData() + sizeof(PacketHeader), BodySize, BodyBytesRead);
+					}
+
+					// 4. 완성된 패킷을 RecvQueue에 넣기 (서브시스템이 꺼내갈 수 있게)
+					EnqueRecvPacket(MoveTemp(FullPacket));
+				}
+			}
+		}
+		
 		FPlatformProcess::Sleep(0.01f);
 	}
 	return 0;
