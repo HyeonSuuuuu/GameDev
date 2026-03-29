@@ -24,9 +24,12 @@ void ULoginWidget::OnLoginButtonClicked()
 		LoginPacket.size = CS_LOGIN_PACKET_SIZE;
 		LoginPacket.id = (uint16)PACKET_ID::CS_LOGIN_REQUEST;
 		// 버퍼에 담기
+		NetSubsystem->CopyStringToBuffer(LoginPacket.userID, MAX_USER_ID_LEN + 1, UserIDInput->GetText().ToString());
+		NetSubsystem->CopyStringToBuffer(LoginPacket.userPW, MAX_USER_PW_LEN + 1, UserPWInput->GetText().ToString());
+		
 		TArray<uint8> SendBuffer;
-		SendBuffer.SetNumUninitialized(CS_LOGIN_PACKET_SIZE);
-		FMemory::Memcpy(SendBuffer.GetData(), &LoginPacket, CS_LOGIN_PACKET_SIZE);
+		SendBuffer.SetNumUninitialized(sizeof(CS_Login));
+		FMemory::Memcpy(SendBuffer.GetData(), &LoginPacket, sizeof(CS_Login));
 		
 		NetSubsystem->EnqueSendPacket(MoveTemp(SendBuffer));
 		UE_LOG(LogTemp, Log, TEXT("C++에서 버튼 클릭을 감지하여 큐에 넣었습니다!"));

@@ -2,7 +2,11 @@
 
 
 #include "Network/NetSubsystem.h"
+
+#include <Protocol.h>
+
 #include "FNetworker.h"
+#include "Kismet/GameplayStatics.h"
 
 void UNetSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -38,6 +42,34 @@ void UNetSubsystem::Deinitialize()
 
 void UNetSubsystem::Tick(float DeltaTime)
 {
+	if (Networker == nullptr) return;
+	
+	TArray<uint8> RecvData = Networker->DequeRecvPacket();
+	while (RecvData.Num() > 0)
+	{
+		if (RecvData.Num() < PACKET_HEADER_SIZE) continue;
+		PacketHeader* Header = reinterpret_cast<PacketHeader*>(RecvData.GetData());
+		PACKET_ID Id = static_cast<PACKET_ID>(Header->id);
+		
+		switch (Id)
+		{
+		case PACKET_ID::SC_LOGIN_RESPONSE:
+			{
+				SC_Login* Pkt = reinterpret_cast<SC_Login*>(RecvData.GetData());
+				
+				if (Pkt->result == static_cast<uint8>(ERROR_CODE::NONE))
+				{
+					// 로그인 성공
+					UE_LOG(LogTemp, Log, TEXT("로그인 성공"));
+					UGameplayStatics::OpenLevel(GetWorld(), FName("Lv1_Lobby"));
+					break;
+				}
+			}
+		}
+		
+		RecvData = Networker->DequeRecvPacket();
+	}
+
 }
 
 TStatId UNetSubsystem::GetStatId() const
