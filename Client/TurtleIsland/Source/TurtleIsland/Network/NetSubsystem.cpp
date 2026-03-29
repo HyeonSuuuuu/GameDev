@@ -36,10 +36,24 @@ void UNetSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
-void UNetSubsystem::TryLogin(FString UserID, FString UserPW)
+void UNetSubsystem::Tick(float DeltaTime)
 {
-	if (Networker)
-	{
-		Networker->SendLoginPacket(UserID, UserPW);
-	}
+}
+
+TStatId UNetSubsystem::GetStatId() const
+{
+	RETURN_QUICK_DECLARE_CYCLE_STAT(UNetSubsystem, STATGROUP_Tickables);
+}
+
+void UNetSubsystem::EnqueSendPacket(TArray<uint8>&& packet)
+{
+	Networker->EnqueSendPacket(MoveTemp(packet));
+}
+
+void UNetSubsystem::CopyStringToBuffer(char* Dest, int32 DestSize, const FString& Source)
+{
+	FTCHARToUTF8 Converter(*Source);
+	int32 CopySize = FMath::Min(Converter.Length(), DestSize - 1);
+	FMemory::Memcpy(Dest, Converter.Get(), CopySize);
+	Dest[CopySize] = '\0'; // 안전하게 마지막 널 문자 삽입
 }

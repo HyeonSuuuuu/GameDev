@@ -17,7 +17,12 @@ class TURTLEISLAND_API UMyGameInstance : public UGameInstance
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="GlobalData")
-	FString user_id = 0;
+	FString user_id;
 	
 	FCriticalSection mutex;
+	
+	UFUNCTION(BlueprintCallable, Category="GlobalData")
+	void UpdateUserIdSafe(const FString & NewId);
+	UFUNCTION(BlueprintPure, Category="GlobalData")
+	FString GetUserIdSafe();
 };

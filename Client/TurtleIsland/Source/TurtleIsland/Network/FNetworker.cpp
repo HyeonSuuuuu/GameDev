@@ -2,7 +2,6 @@
 #include "SocketSubsystem.h"
 #include "Protocol.h"
 #include "Interfaces/IPv4/IPv4Address.h"
-
 FNetworker::FNetworker()
 {
 }
@@ -10,6 +9,30 @@ FNetworker::FNetworker()
 FNetworker::~FNetworker()
 {
 	Exit();
+}
+
+void FNetworker::EnqueSendPacket(TArray<uint8>&& packet)
+{
+	SendQueue.Enqueue((MoveTemp(packet)));
+}
+
+TArray<uint8> FNetworker::DequeSendPacket()
+{
+	TArray<uint8> PopData;
+	SendQueue.Dequeue(PopData);
+	return PopData;
+}
+
+void FNetworker::EnqueRecvPacket(TArray<uint8>&& packet)
+{
+	RecvQueue.Enqueue(MoveTemp(packet));
+}
+
+TArray<uint8> FNetworker::DequeRecvPacket()
+{
+	TArray<uint8> PopData;
+	RecvQueue.Dequeue(PopData);
+	return PopData;
 }
 
 bool FNetworker::Init()
@@ -38,27 +61,21 @@ bool FNetworker::Init()
 
 uint32 FNetworker::Run()
 {
-	CS_Login loginPacket {};
-	loginPacket.id = static_cast<uint16>(PACKET_ID::CS_LOGIN_REQUEST);
-	loginPacket.size = CS_LOGIN_PACKET_SIZE;
-	const FString* ID = "hyeonsu1234";
-	const FString* PW = "hyeonsu8900";
-	FMemory::Memcpy(loginPacket.userID, ID, MAX_USER_ID_LEN);
-	FMemory::Memcpy(loginPacket.userPW, PW, MAX_USER_PW_LEN);
-	
-	int32 byteSent = 0;
-	bool retval = Socket->Send((uint8*)&loginPacket, CS_LOGIN_PACKET_SIZE, byteSent);
-	if (retval && byteSent > 0)
-	{
-		UE_LOG(LogTemp, Log, TEXT("Send Success! Sent %d bytes"), byteSent);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Send Failed!"));
-	}
-	
 	while (IsRunning)
 	{
+		while (true)
+		{
+			TArray<uint8> SendPacket = DequeSendPacket();
+			if (SendPacket.Num() == 0)
+			{
+				break;
+			}
+			if (Socket)
+			{
+				int32 BytesSent = 0;
+				Socket->Send(SendPacket.GetData(), SendPacket.Num(), BytesSent);
+			}
+		}
 		FPlatformProcess::Sleep(0.01f);
 	}
 	return 0;
@@ -81,15 +98,3 @@ void FNetworker::Stop()
 	IsRunning = false;
 	FRunnable::Stop();
 }
-
-void FNetworker::SendLoginPacket(const FString& userID, const FString& userPW)
-{
-	CS_Login LoginPacket {};
-	LoginPacket.id = static_cast<uint16>(PACKET_ID::CS_LOGIN_REQUEST);
-	LoginPacket.size = sizeof(CS_LOGIN_PACKET_SIZE);
-	
-
-	// Fstring -> char 변환
-}
-
-//언리얼에서 값 가져와서 형변환해서 패킷에 넣기, 그 패킷을 큐에 넣음: 레벨마다 패킷의 크기가 다르니까 가변으로 push해서 Run에서 그 패킷을 pop한다.

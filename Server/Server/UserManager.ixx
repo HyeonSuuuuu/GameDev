@@ -2,7 +2,7 @@ export module UserManager;
 
 import Common;
 import User;
-import ErrorCode;
+import "../../Common/Protocol.h";
 
 export class UserManager
 {
