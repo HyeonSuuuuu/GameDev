@@ -2,7 +2,11 @@
 
 
 #include "Network/NetSubsystem.h"
+
+#include <Protocol.h>
+
 #include "FNetworker.h"
+#include "Kismet/GameplayStatics.h"
 
 void UNetSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -36,10 +40,53 @@ void UNetSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
-void UNetSubsystem::TryLogin(FString UserID, FString UserPW)
+void UNetSubsystem::Tick(float DeltaTime)
 {
-	if (Networker)
+	if (Networker == nullptr) return;
+	
+	TArray<uint8> RecvData = Networker->DequeRecvPacket();
+	while (RecvData.Num() > 0)
 	{
-		Networker->SendLoginPacket(UserID, UserPW);
+		if (RecvData.Num() < PACKET_HEADER_SIZE) continue;
+		PacketHeader* Header = reinterpret_cast<PacketHeader*>(RecvData.GetData());
+		PACKET_ID Id = static_cast<PACKET_ID>(Header->id);
+		
+		switch (Id)
+		{
+		case PACKET_ID::SC_LOGIN_RESPONSE:
+			{
+				SC_Login* Pkt = reinterpret_cast<SC_Login*>(RecvData.GetData());
+				
+				if (Pkt->result == static_cast<uint8>(ERROR_CODE::NONE))
+				{
+					// 로그인 성공
+					UE_LOG(LogTemp, Log, TEXT("로그인 성공"));
+					UGameplayStatics::OpenLevel(GetWorld(), FName("Lv1_Lobby"));
+
+					break;
+				}
+			}
+		}
+		
+		RecvData = Networker->DequeRecvPacket();
 	}
+
+}
+
+TStatId UNetSubsystem::GetStatId() const
+{
+	RETURN_QUICK_DECLARE_CYCLE_STAT(UNetSubsystem, STATGROUP_Tickables);
+}
+
+void UNetSubsystem::EnqueSendPacket(TArray<uint8>&& packet)
+{
+	Networker->EnqueSendPacket(MoveTemp(packet));
+}
+
+void UNetSubsystem::CopyStringToBuffer(char* Dest, int32 DestSize, const FString& Source)
+{
+	FTCHARToUTF8 Converter(*Source);
+	int32 CopySize = FMath::Min(Converter.Length(), DestSize - 1);
+	FMemory::Memcpy(Dest, Converter.Get(), CopySize);
+	Dest[CopySize] = '\0'; // 안전하게 마지막 널 문자 삽입
 }

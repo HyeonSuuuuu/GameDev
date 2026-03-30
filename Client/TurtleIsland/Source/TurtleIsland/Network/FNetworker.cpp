@@ -2,7 +2,6 @@
 #include "SocketSubsystem.h"
 #include "Protocol.h"
 #include "Interfaces/IPv4/IPv4Address.h"
-
 FNetworker::FNetworker()
 {
 }
@@ -10,6 +9,30 @@ FNetworker::FNetworker()
 FNetworker::~FNetworker()
 {
 	Exit();
+}
+
+void FNetworker::EnqueSendPacket(TArray<uint8>&& packet)
+{
+	SendQueue.Enqueue((MoveTemp(packet)));
+}
+
+TArray<uint8> FNetworker::DequeSendPacket()
+{
+	TArray<uint8> PopData;
+	SendQueue.Dequeue(PopData);
+	return PopData;
+}
+
+void FNetworker::EnqueRecvPacket(TArray<uint8>&& packet)
+{
+	RecvQueue.Enqueue(MoveTemp(packet));
+}
+
+TArray<uint8> FNetworker::DequeRecvPacket()
+{
+	TArray<uint8> PopData;
+	RecvQueue.Dequeue(PopData);
+	return PopData;
 }
 
 bool FNetworker::Init()
@@ -38,27 +61,58 @@ bool FNetworker::Init()
 
 uint32 FNetworker::Run()
 {
-	CS_Login loginPacket {};
-	loginPacket.id = static_cast<uint16>(PACKET_ID::CS_LOGIN_REQUEST);
-	loginPacket.size = CS_LOGIN_PACKET_SIZE;
-	const char* ID = "hyeonsu1234";
-	const char* PW = "hyeonsu8900";
-	FMemory::Memcpy(loginPacket.userID, ID, MAX_USER_ID_LEN);
-	FMemory::Memcpy(loginPacket.userPW, PW, MAX_USER_PW_LEN);
-	
-	int32 byteSent = 0;
-	bool retval = Socket->Send((uint8*)&loginPacket, CS_LOGIN_PACKET_SIZE, byteSent);
-	if (retval && byteSent > 0)
-	{
-		UE_LOG(LogTemp, Log, TEXT("Send Success! Sent %d bytes"), byteSent);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Send Failed!"));
-	}
-	
 	while (IsRunning)
 	{
+		while (true)
+		{
+			TArray<uint8> SendPacket = DequeSendPacket();
+			if (SendPacket.Num() == 0) break;
+			if (Socket)
+			{
+				int32 BytesSent = 0;
+				Socket->Send(SendPacket.GetData(), SendPacket.Num(), BytesSent);
+			}
+		}
+		
+		if (Socket)
+		{
+			uint32 PendingDataSize = 0;
+			if (Socket->HasPendingData(PendingDataSize) && PendingDataSize >= sizeof(PacketHeader))
+			{
+				// 1. 헤더 먼저 읽기
+				TArray<uint8> HeaderBuffer;
+				HeaderBuffer.SetNumUninitialized(sizeof(PacketHeader));
+				int32 BytesRead = 0;
+                
+				if (Socket->Recv(HeaderBuffer.GetData(), HeaderBuffer.Num(), BytesRead))
+				{
+					PacketHeader* Header = reinterpret_cast<PacketHeader*>(HeaderBuffer.GetData());
+					uint16 FullSize = Header->size;
+
+					// 2. 헤더에 적힌 전체 크기만큼 버퍼 준비
+					TArray<uint8> FullPacket;
+					FullPacket.SetNumUninitialized(FullSize);
+                    
+					// 이미 읽은 헤더 부분 복사
+					FMemory::Memcpy(FullPacket.GetData(), HeaderBuffer.GetData(), sizeof(PacketHeader));
+
+					// 3. 남은 바디 데이터 읽기
+					int32 BodySize = FullSize - sizeof(PacketHeader);
+					int32 BodyBytesRead = 0;
+                    
+					if (BodySize > 0)
+					{
+						// 실제 데이터가 다 올 때까지 잠시 기다리거나 루프를 돌 수 있지만, 
+						// 간단하게 Recv로 남은 부분 보충
+						Socket->Recv(FullPacket.GetData() + sizeof(PacketHeader), BodySize, BodyBytesRead);
+					}
+
+					// 4. 완성된 패킷을 RecvQueue에 넣기 (서브시스템이 꺼내갈 수 있게)
+					EnqueRecvPacket(MoveTemp(FullPacket));
+				}
+			}
+		}
+		
 		FPlatformProcess::Sleep(0.01f);
 	}
 	return 0;
@@ -80,13 +134,4 @@ void FNetworker::Stop()
 {
 	IsRunning = false;
 	FRunnable::Stop();
-}
-
-void FNetworker::SendLoginPacket(const FString& userID, const FString& userPW)
-{
-	CS_Login LoginPacket {};
-	LoginPacket.id = static_cast<uint16>(PACKET_ID::CS_LOGIN_REQUEST);
-	LoginPacket.size = sizeof(CS_LOGIN_PACKET_SIZE);
-	
-	// Fstring -> char 변환
 }

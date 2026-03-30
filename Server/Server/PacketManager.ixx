@@ -171,13 +171,18 @@ private:
 		const CS_Login* loginReqPacket = reinterpret_cast<const CS_Login*>(dataSpan.data());
 		Log::Info("id: {} pw: {}", loginReqPacket->userID, loginReqPacket->userPW);
 
-		SC_Login loginResPacket;
+		SC_Login loginResPacket{};
+		loginResPacket.size = SC_LOGIN_PACKET_SIZE;
+		loginResPacket.id = static_cast<uint16>(PACKET_ID::SC_LOGIN_RESPONSE);
+		// 아이디, 비번 검사 (DB 연동)
+
+		loginResPacket.result = static_cast<uint16>(ERROR_CODE::NONE);
+		loginResPacket.playerId = sessionIndex;
 		
+		std::span<const byte> sendSpan(reinterpret_cast<const byte*>(&loginResPacket), SC_LOGIN_PACKET_SIZE);
+		this->m_sendFunc(sessionIndex, sendSpan);
 		
-		
-		// 이름 중복 검사
-		
-		Log::Info("로그인 요청");
+		Log::Info("로그인 응답 전송 완료 - Sessin {}", sessionIndex);
 	}
 
 	std::function<void(uint32, std::span<const byte>)> m_recvFunc;
