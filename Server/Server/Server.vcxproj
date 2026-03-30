@@ -138,7 +138,6 @@
     <ClCompile Include="Common.ixx" />
     <ClCompile Include="Define.ixx" />
     <ClCompile Include="EchoServer.ixx" />
-    <ClCompile Include="ErrorCode.ixx" />
     <ClCompile Include="IOCPNetwork.ixx" />
     <ClCompile Include="EchoMain.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

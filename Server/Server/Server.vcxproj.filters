@@ -45,9 +45,6 @@
     <ClCompile Include="UserManager.ixx">
       <Filter>04_Application</Filter>
     </ClCompile>
-    <ClCompile Include="ErrorCode.ixx">
-      <Filter>04_Application</Filter>
-    </ClCompile>
     <ClCompile Include="PacketManager.ixx">
       <Filter>04_Application</Filter>
     </ClCompile>
