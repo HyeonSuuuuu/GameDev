@@ -127,8 +127,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="testClient.cpp" />
-    <ClCompile Include="NetworkModule.cpp" />
+    <ClCompile Include="DrawModule.cpp" />
+    <ClCompile Include="NetworkModule.ixx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Server\Server.vcxproj">
+      <Project>{656e1311-e9dd-4b72-b8a6-b098fa5fb76b}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
