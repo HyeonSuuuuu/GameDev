@@ -134,6 +134,9 @@ public:
 		return packet;
 	}
 
+
+	float x{}, y{}, z{88};
+
 private:
 	uint32 m_index;
 	std::optional<uint32> m_roomIndex;

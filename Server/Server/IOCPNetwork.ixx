@@ -11,6 +11,9 @@ import Session;
 import SessionManager;
 
 
+constexpr uint32 AI_ID = UINT_MAX;
+
+
 export class IOCPNetwork
 {
 public:
@@ -51,6 +54,49 @@ public:
 		Log::Success("소켓 초기화 성공");
 		return true;
 	}
+	
+	bool ConnectToAIServer(const std::string& ip, uint16 port)
+	{
+		m_aiSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);
+		if (m_aiSocket == INVALID_SOCKET)
+		{
+			Log::Error("Ai 소켓 생성 실패", WSAGetLastError());
+			return false;
+		}
+
+		sockaddr_in aiAddr{};
+		aiAddr.sin_family = AF_INET;
+		inet_pton(AF_INET, ip.c_str(), &aiAddr.sin_addr);
+		aiAddr.sin_port = htons(port);
+
+		Log::Info("Ai 서버에 연결 시도 (IP: {}, Port: {})", ip, port);
+		if (connect(m_aiSocket, (sockaddr*)&aiAddr, sizeof(aiAddr)) == SOCKET_ERROR)
+		{
+			Log::Error("Ai 서버 연결 실패", WSAGetLastError());
+			closesocket(m_aiSocket);
+			return false;
+		}
+
+		m_aiSession = std::make_unique<Session>(AI_ID);
+		if (m_aiSession == nullptr)
+		{
+			Log::Error("AI 세션 생성 실패");
+			return false;
+		}
+
+
+		HANDLE hIOCP = CreateIoCompletionPort((HANDLE)m_aiSocket, m_iocpHandle, (ULONG_PTR)&m_aiSession, 0);
+		if (hIOCP == nullptr || hIOCP != m_iocpHandle)
+		{
+			Log::ErrorDisplay("aiSocket IOCP 등록 실패", GetLastError());
+			return false;
+		}
+
+
+		
+		return true;
+	}
+
 	bool BindandListen(const int32 port) const
 	{
 		sockaddr_in serverAddr {};
@@ -215,8 +261,7 @@ private:
 				}
 				continue;
 			}
-
-			if (!isSuccess || (dwIoSize == 0 && isSuccess))
+			else if (!isSuccess || (dwIoSize == 0 && isSuccess))
 			{
 				if (pSession)
 				{
@@ -225,7 +270,7 @@ private:
 				continue;
 			}
 
-			if (IOOperation::RECV == pOverlappedEx->m_operation)
+			else if (IOOperation::RECV == pOverlappedEx->m_operation)
 			{
 				const auto dataSpan{ pSession->GetRecvData(dwIoSize) };
 				OnRecv(pSession->GetIndex(), dataSpan);
@@ -252,12 +297,13 @@ private:
 	}
 
 	SOCKET m_listenSocket = INVALID_SOCKET;
+	SOCKET m_aiSocket = INVALID_SOCKET;
 	std::unique_ptr<SessionManager> m_sessionManager;
 	std::atomic<int> m_clientCnt = 0;
 
 	std::vector<std::thread> m_IOWorkerThreads;
 	bool m_isWorkerRun = false;
-
+	std::unique_ptr<Session> m_aiSession;
 
 	HANDLE m_iocpHandle = INVALID_HANDLE_VALUE;
 

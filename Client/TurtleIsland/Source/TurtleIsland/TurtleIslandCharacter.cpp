@@ -11,6 +11,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "TurtleIsland.h"
+#include "Network/NetSubsystem.h"
+#include "Protocol.h"
 
 ATurtleIslandCharacter::ATurtleIslandCharacter()
 {
@@ -72,6 +74,36 @@ void ATurtleIslandCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	}
 }
 
+void ATurtleIslandCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	LastMoveInputTime += DeltaTime;
+
+	if (LastMoveInputTime > PacketSendInterval)
+	{
+		LastMoveInputTime -= PacketSendInterval;
+		if (InputFlag > 0)
+		{
+			UNetSubsystem* NetSubsystem = GetGameInstance()->GetSubsystem<UNetSubsystem>();
+			if (NetSubsystem)
+			{
+				CS_Move MovePacket{};
+				MovePacket.size = CS_MOVE_PACKET_SIZE;
+				MovePacket.id = (uint16)PACKET_ID::CS_MOVE;
+				MovePacket.inputFlag = InputFlag;
+
+				TArray<uint8> SendBuffer;
+				SendBuffer.SetNumUninitialized(CS_MOVE_PACKET_SIZE);
+				FMemory::Memcpy(SendBuffer.GetData(), &MovePacket, CS_MOVE_PACKET_SIZE);
+
+				NetSubsystem->EnqueSendPacket(MoveTemp(SendBuffer));
+				UE_LOG(LogTemp, Log, TEXT("이동패킷 전송 완료"));
+				InputFlag = 0;
+			}
+		}
+	}
+}
+
 void ATurtleIslandCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
@@ -97,16 +129,18 @@ void ATurtleIslandCharacter::DoMove(float Right, float Forward)
 		// find out which way is forward
 		const FRotator Rotation = GetController()->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		// get forward vector
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-
-		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
 		// add movement 
 		AddMovementInput(ForwardDirection, Forward);
 		AddMovementInput(RightDirection, Right);
+
+		// 서버로 보낼 InputFlag
+		if (Forward > 0.1f) InputFlag |= 1; // W
+		if (Right < -0.1f) InputFlag |= 2; // A
+		if (Forward < -0.1f)   InputFlag |= 4; // S
+		if (Right > 0.1f)    InputFlag |= 8; // D
 	}
 }
 

@@ -2,6 +2,7 @@
 
 
 #include "Network/NetSubsystem.h"
+#include "NetSettings.h"
 
 #include <Protocol.h>
 
@@ -15,6 +16,8 @@ void UNetSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	Networker = new FNetworker();
 	Thread = FRunnableThread::Create(Networker, TEXT("Network Thread"));
 	
+	OpponentClass = UNetSettings::Get()->OpponentClass;
+
 	UE_LOG(LogTemp, Warning, TEXT("Network Thread Started!"));
 }
 
@@ -43,14 +46,14 @@ void UNetSubsystem::Deinitialize()
 void UNetSubsystem::Tick(float DeltaTime)
 {
 	if (Networker == nullptr) return;
-	
+
 	TArray<uint8> RecvData = Networker->DequeRecvPacket();
 	while (RecvData.Num() > 0)
 	{
 		if (RecvData.Num() < PACKET_HEADER_SIZE) continue;
 		PacketHeader* Header = reinterpret_cast<PacketHeader*>(RecvData.GetData());
 		PACKET_ID Id = static_cast<PACKET_ID>(Header->id);
-		
+
 		switch (Id)
 		{
 		case PACKET_ID::SC_LOGIN_RESPONSE:
@@ -61,13 +64,51 @@ void UNetSubsystem::Tick(float DeltaTime)
 				{
 					// 로그인 성공
 					UE_LOG(LogTemp, Log, TEXT("로그인 성공"));
-					UGameplayStatics::OpenLevel(GetWorld(), FName("Lv1_Lobby"));
-
-					break;
+					myId = Pkt->playerId;
+					// UGameplayStatics::OpenLevel(GetWorld(), FName("Lv1_Lobby"));
+					UGameplayStatics::OpenLevel(GetWorld(), FName("Lv3_Ingame")); // 테스트용
 				}
+			break;
+			}
+		case PACKET_ID::SC_MOVE_NOTIFY:
+			{
+				SC_MoveNotify* Pkt = reinterpret_cast<SC_MoveNotify*>(RecvData.GetData());
+				if (myId == Pkt->userIndex)
+				{
+					// 내 캐릭터 이동처리
+				}
+				else
+				{
+					// 상대방 캐릭터 이동처리
+					if (players.Contains(Pkt->userIndex))
+					{
+						AOpponentCharacter* Opponent = players[Pkt->userIndex];
+						if (Opponent)
+						{
+							FVector NewLocation(Pkt->x, Pkt->y, Pkt->z);
+							FRotator NewRotation(0.f, Pkt->yaw, 0.f);
+							Opponent->SetActorLocationAndRotation(NewLocation, NewRotation);
+						}
+					}
+					else
+					{
+						FVector TestPos(Pkt->x, Pkt->y, Pkt->z); // 초기 위치
+						FActorSpawnParameters Params;
+						if (OpponentClass)
+						{
+							AOpponentCharacter* TestActor = GetWorld()->SpawnActor<AOpponentCharacter>(OpponentClass, TestPos, FRotator::ZeroRotator, Params);
+							players.Emplace(Pkt->userIndex, TestActor);
+							UE_LOG(LogTemp, Log, TEXT("새로운 상대방 스폰"));
+
+						}
+					}
+				}
+
+
+				UE_LOG(LogTemp, Log, TEXT("이동 패킷 수신: PlayerID=%d, InputFlag=%d"), Pkt->id, Pkt->inputFlag);
+			break;
 			}
 		}
-		
 		RecvData = Networker->DequeRecvPacket();
 	}
 

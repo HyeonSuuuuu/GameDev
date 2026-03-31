@@ -58,7 +58,10 @@ protected:
 
 	/** Initialize input action bindings */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	virtual void Tick(float DeltaTime) override;
+	float LastMoveInputTime = 0.f;
+	const float PacketSendInterval = 1.f / 30.f;
+	uint8 InputFlag = 0;
 protected:
 
 	/** Called for movement input */
@@ -86,7 +89,6 @@ public:
 	virtual void DoJumpEnd();
 
 public:
-
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 

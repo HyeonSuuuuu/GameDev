@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Tickable.h"
+#include "OpponentCharacter.h"
 #include "NetSubsystem.generated.h"
 
 /**
@@ -32,7 +33,10 @@ public:
 	void EnqueSendPacket(TArray<uint8>&& packet);
 	//helper func
 	void CopyStringToBuffer(char* Dest, int32 DestSize, const FString& Source);
-
+	
+	// 상대방 캐릭터 BP 클래스 끌어다 사용
+	UPROPERTY(EditAnywhere, Category = "Network")
+	TSubclassOf<class AOpponentCharacter> OpponentClass;
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Network")
 	bool IsConnect = false;
@@ -40,5 +44,8 @@ protected:
 	FNetworker* Networker = nullptr;
 	FRunnableThread* Thread = nullptr;
 	
+	UPROPERTY()
+	TMap<uint32, AOpponentCharacter*> players;
 	
+	uint32 myId = 0;
 };

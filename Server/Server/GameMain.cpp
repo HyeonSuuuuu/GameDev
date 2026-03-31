@@ -12,6 +12,7 @@ int main()
 
 	server.InitEnvironment();
 	server.InitSocket();
+	server.ConnectToAIServer();
 	server.BindandListen(SERVER_PORT);
 	server.Run(MAX_CLIENT);
 

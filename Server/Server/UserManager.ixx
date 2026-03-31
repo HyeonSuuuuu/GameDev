@@ -45,7 +45,7 @@ public:
 	void AddUser(uint32 sessionIndex)
 	{
 		m_users[sessionIndex]->Init();
-
+		m_connectedUserIndex.push_back(sessionIndex);
 		return;
 	}
 	void RemoveUser(uint32 sessionIndex)
@@ -56,7 +56,7 @@ public:
 			return;
 
 		m_userIdToIndex.erase(pUser->GetUserId());
-
+		m_connectedUserIndex.remove(sessionIndex);
 		m_users[sessionIndex]->Clear();
 
 	}
@@ -68,7 +68,6 @@ public:
 		uint32 userIndex = sessionIndex;
 		m_users[userIndex]->SetLogin(userId);
 		m_userIdToIndex.emplace(userId, userIndex);
-
 		return ERROR_CODE::NONE;
 	}
 
@@ -85,7 +84,8 @@ public:
 	{
 		return 	m_users[index].get();
 	}
-	
+
+	std::list<uint32> m_connectedUserIndex;
 private:
 	uint32 m_maxUserCnt = 0;
 	uint32 m_currentUserCnt = 0;

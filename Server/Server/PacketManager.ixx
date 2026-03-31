@@ -16,6 +16,7 @@ public:
 		Register(PACKET_ID::SYS_USER_CONNECT, &PacketManager::ProcessUserConnect);
 		Register(PACKET_ID::SYS_USER_DISCONNECT, &PacketManager::ProcessUserDisConnect);
 		Register(PACKET_ID::CS_LOGIN_REQUEST, &PacketManager::ProcessLogin);
+		Register(PACKET_ID::CS_MOVE, &PacketManager::ProcessMove);
 		CreateComponent(maxClient);
 	}
 
@@ -183,6 +184,54 @@ private:
 		this->m_sendFunc(sessionIndex, sendSpan);
 		
 		Log::Info("로그인 응답 전송 완료 - Sessin {}", sessionIndex);
+	}
+
+	void ProcessMove(uint32 sessionIndex, std::span<const byte> dataSpan)
+	{
+		static int count = 0;
+		if (CS_MOVE_PACKET_SIZE != dataSpan.size())
+			return;
+
+		const CS_Move* movePacket = reinterpret_cast<const CS_Move*>(dataSpan.data());
+		Log::Info("CS_Move({}): {}", sessionIndex, movePacket->inputFlag);
+
+		const auto& user = m_userManager->GetUser(sessionIndex);
+		// 이동처리
+		if (movePacket->inputFlag & 1) user->x += 10.0f; // W
+		if (movePacket->inputFlag & 2) user->y -= 10.0f; // A
+		if (movePacket->inputFlag & 4) user->x -= 10.0f; // S
+		if (movePacket->inputFlag & 8) user->y += 10.0f; // D
+
+		SC_MoveNotify resPkt{};
+		resPkt.id = static_cast<uint16>(PACKET_ID::SC_MOVE_NOTIFY);
+		resPkt.size = SC_MOVE_NOTIFY_PACKET_SIZE;
+		resPkt.x = user->x;
+		resPkt.y = user->y;
+		resPkt.z = user->z;
+		resPkt.inputFlag = movePacket->inputFlag;
+		resPkt.userIndex = sessionIndex;
+		std::span<const byte> sendSpan(reinterpret_cast<const byte*>(&resPkt), SC_MOVE_NOTIFY_PACKET_SIZE);
+		// broadcast
+		for (uint32 index : m_userManager->m_connectedUserIndex)
+		{
+			this->m_sendFunc(index, sendSpan);
+		}
+	}
+
+	// AI에게 Send
+	void ProcesstNpcChat(uint32 sessionIndex, std::span<const byte> dataSpan)
+	{
+/*		if (dataSpan.size() < CS_NPC_CHAT_PACKET_SIZE)
+			return;
+		const CS_NpcChat* npcChatPacket = reinterpret_cast<const CS_NpcChat*>(dataSpan.data());
+		if (dataSpan.size() < CS_NPC_CHAT_PACKET_SIZE + sizeof(uint32_t))
+			return;
+		uint32_t chatLen = *reinterpret_cast<const uint32_t*>(dataSpan.data() + CS_NPC_CHAT_PACKET_SIZE);
+		
+		if (dataSpan.size() < CS_NPC_CHAT_PACKET_SIZE + sizeof(uint32_t) + chatLen)
+		char* chatMsg = reinterpret_cast<char*>(dataSpan.data() + CS_NPC_CHAT_PACKET_SIZE + sizeof(uint32_t));
+		Log::Info("Client({}): {}", sessionIndex, chatMsg);*/
+
 	}
 
 	std::function<void(uint32, std::span<const byte>)> m_recvFunc;

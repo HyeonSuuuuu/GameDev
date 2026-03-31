@@ -117,11 +117,11 @@ public:
 		}
 
 		// 주소 꺼내오기 Ex 함수 사용해야함
-		sockaddr_in clientAddr{};
+/*		sockaddr_in clientAddr{};
 		int32 addrLen = sizeof(sockaddr_in);
 		char clientIP[32] = { 0 };
 		inet_ntop(AF_INET, &(clientAddr.sin_addr), clientIP, 32 - 1);
-		Log::Info("클라이언트 접속 : IP({}) SOCKET({})", clientIP, m_socket);
+		Log::Info("클라이언트 접속 : IP({}) SOCKET({})", clientIP, m_socket);*/
 
 		return true;
 	}
